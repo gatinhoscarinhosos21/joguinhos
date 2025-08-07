@@ -7,9 +7,18 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
+    <!-- Tela Inicial -->
+    <div id="start-screen">
+        <h1>Jogo de Plataforma</h1>
+        <p>Desenvolvido por <span id="player-name">Ana Carla S.A</span></p> <!-- Seu nome aqui -->
+        <p>Pressione "Enter" para começar</p>
+    </div>
+
+    <!-- Jogo -->
+    <div id="game-container" style="display: none;">
         <div id="player"></div>
         <div id="ground"></div>
+        <div id="name-in-game">Jogador: <span id="player-name-game">Seu Nome</span></div> <!-- Nome no jogo -->
     </div>
 
     <script src="script.js"></script>
