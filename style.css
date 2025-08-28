@@ -1,0 +1,50 @@
+body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background: linear-gradient(to bottom, #ffcce6, #ff99cc);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    margin: 0;
+}
+
+#game-container {
+    position: relative;
+    width: 800px;
+    height: 500px;  /* Tamanho fixo para o contêiner */
+    background: linear-gradient(to bottom, #87ceeb, #e0f7ff);
+    border: 5px solid #ff66a3;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+#hello-kitty {
+    position: absolute;
+    width: 50px;
+    height: 70px;
+    background: #ff99cc;
+    border-radius: 50% 50% 40% 40%;
+    top: 300px;
+    left: 100px;
+    z-index: 100;
+    transition: transform 0.2s;
+    /* Certificando-se de que a Hello Kitty não ultrapasse a tela */
+    bottom: 0;
+    left: 0;
+}
+
+#score-container {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 20px;
+    color: #ff66a3;
+    font-weight: bold;
+    z-index: 200;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
