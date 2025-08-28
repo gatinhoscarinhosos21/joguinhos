@@ -279,4 +279,118 @@
             startScreen.style.display = 'none';
             gameOverScreen.style.display = 'none';
 
-            // Reposicionar
+            // Reposicionar Hello Kitty
+            helloKitty.style.top = '300px';
+            helloKitty.style.left = '100px';
+            
+            // Limpar plataformas e moedas existentes
+            document.querySelectorAll('.platform, .coin, .cloud').forEach(el => el.remove());
+            platforms = [];
+            coins = [];
+
+            // Criar plataformas
+            createPlatform(0, 450, 800, 50); // Chão
+            createPlatform(100, 350, 200, 20);
+            createPlatform(400, 250, 200, 20);
+            createPlatform(200, 150, 150, 20);
+            createPlatform(600, 350, 150, 20);
+
+            // Novas plataformas
+            createPlatform(100, 100, 150, 20);
+            createPlatform(500, 450, 150, 20);
+            createPlatform(700, 300, 100, 20);
+
+            // Criar moedas
+            createCoin(150, 310);
+            createCoin(450, 210);
+            createCoin(250, 110);
+            createCoin(650, 310);
+            createCoin(300, 310);
+            createCoin(120, 90);
+            createCoin(570, 440);
+
+            // Criar nuvens
+            createCloud(100, 50, 60);
+            createCloud(300, 80, 40);
+            createCloud(600, 60, 70);
+
+            // Iniciar o loop do jogo
+            gameLoop();
+        }
+
+        // Função para criar plataformas
+        function createPlatform(x, y, width, height) {
+            let platform = document.createElement('div');
+            platform.classList.add('platform');
+            platform.style.left = `${x}px`;
+            platform.style.top = `${y}px`;
+            platform.style.width = `${width}px`;
+            platform.style.height = `${height}px`;
+            gameContainer.appendChild(platform);
+            platforms.push(platform);
+        }
+
+        // Função para criar moedas
+        function createCoin(x, y) {
+            let coin = document.createElement('div');
+            coin.classList.add('coin');
+            coin.style.left = `${x}px`;
+            coin.style.top = `${y}px`;
+            gameContainer.appendChild(coin);
+            coins.push(coin);
+        }
+
+        // Função para criar nuvens
+        function createCloud(x, y, size) {
+            let cloud = document.createElement('div');
+            cloud.classList.add('cloud');
+            cloud.style.left = `${x}px`;
+            cloud.style.top = `${y}px`;
+            cloud.style.width = `${size}px`;
+            cloud.style.height = `${size}px`;
+            gameContainer.appendChild(cloud);
+        }
+
+        // Função do loop do jogo (para movimentação e colisões)
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            // Atualizando a posição do personagem (gravity)
+            kittyVelocityY += gravity;
+            let kittyTop = parseInt(helloKitty.style.top.replace('px', '')) + kittyVelocityY;
+            helloKitty.style.top = kittyTop + 'px';
+
+            // Verificar colisões com as plataformas
+            platforms.forEach(platform => {
+                let platTop = parseInt(platform.style.top.replace('px', ''));
+                let platLeft = parseInt(platform.style.left.replace('px', ''));
+                let platWidth = platform.offsetWidth;
+                let platHeight = platform.offsetHeight;
+
+                // Verificando se Hello Kitty toca na plataforma
+                if (kittyTop + helloKitty.offsetHeight <= platTop && kittyTop + helloKitty.offsetHeight + kittyVelocityY >= platTop && parseInt(helloKitty.style.left) + helloKitty.offsetWidth > platLeft && parseInt(helloKitty.style.left) < platLeft + platWidth) {
+                    kittyVelocityY = 0;
+                    helloKitty.style.top = platTop - helloKitty.offsetHeight + 'px';
+                    isJumping = false;
+                }
+            });
+
+            // Verificar colisão com moedas
+            coins.forEach((coin, index) => {
+                let coinLeft = parseInt(coin.style.left.replace('px', ''));
+                let coinTop = parseInt(coin.style.top.replace('px', ''));
+                
+                if (parseInt(helloKitty.style.left) + helloKitty.offsetWidth > coinLeft && parseInt(helloKitty.style.left) < coinLeft + coin.offsetWidth && kittyTop + helloKitty.offsetHeight > coinTop && kittyTop < coinTop + coin.offsetHeight) {
+                    coin.remove();
+                    coins.splice(index, 1);
+                    score += 10;
+                    scoreDisplay.textContent = score;
+                }
+            });
+
+            // Loop do jogo
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>
