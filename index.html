@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -111,6 +111,13 @@
             border-radius: 10px;
         }
        
+        .moving-platform {
+            position: absolute;
+            background: #86c8ed;
+            border: 3px solid #5ca0cc;
+            border-radius: 10px;
+        }
+       
         .coin {
             position: absolute;
             width: 25px;
@@ -141,20 +148,6 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
        
-        #attempts-container {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-size: 20px;
-            color: #ff66a3;
-            font-weight: bold;
-            z-index: 200;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-       
         #start-screen, #game-over {
             position: absolute;
             top: 0;
@@ -173,20 +166,6 @@
             display: none;
         }
        
-        #restart-notification {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px 30px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-            z-index: 350;
-            display: none;
-        }
-       
         h1 {
             color: #ff66a3;
             font-size: 48px;
@@ -198,12 +177,6 @@
             color: #ff66a3;
             font-size: 36px;
             margin-bottom: 30px;
-        }
-       
-        h3 {
-            color: #ff66a3;
-            font-size: 28px;
-            margin-bottom: 15px;
         }
        
         p {
@@ -268,7 +241,6 @@
         </div>
        
         <div id="score-container">Pontuação: <span id="score">0</span></div>
-        <div id="attempts-container">Tentativas: <span id="attempts">3</span></div>
        
         <div id="start-screen">
             <h1>Hello Kitty Adventure</h1>
@@ -281,11 +253,6 @@
             <p>Sua pontuação: <span id="final-score">0</span></p>
             <button onclick="restartGame()">Jogar Novamente</button>
         </div>
-        
-        <div id="restart-notification">
-            <h3>Oops! Você caiu!</h3>
-            <p>Reiniciando em <span id="countdown">3</span> segundos...</p>
-        </div>
        
         <div id="controls">
             <button onclick="moveLeft()">Esquerda ←</button>
@@ -297,52 +264,62 @@
     <script>
         // Variáveis do jogo
         let score = 0;
-        let attempts = 3;
         let gameRunning = false;
         let helloKitty = document.getElementById('hello-kitty');
         let gameContainer = document.getElementById('game-container');
         let scoreDisplay = document.getElementById('score');
-        let attemptsDisplay = document.getElementById('attempts');
         let finalScoreDisplay = document.getElementById('final-score');
         let startScreen = document.getElementById('start-screen');
         let gameOverScreen = document.getElementById('game-over');
-        let restartNotification = document.getElementById('restart-notification');
-        let countdownDisplay = document.getElementById('countdown');
         let platforms = [];
+        let movingPlatforms = [];
         let coins = [];
         let kittyVelocityY = 0;
         let kittyVelocityX = 0;
         let isJumping = false;
         let gravity = 0.5;
         let gameLoopId;
-        let restartCountdown;
        
         // Inicializar o jogo
         function startGame() {
             score = 0;
-            attempts = 3;
             gameRunning = true;
             scoreDisplay.textContent = score;
-            attemptsDisplay.textContent = attempts;
             startScreen.style.display = 'none';
             gameOverScreen.style.display = 'none';
-            restartNotification.style.display = 'none';
            
             // Reposicionar Hello Kitty
             helloKitty.style.top = '300px';
             helloKitty.style.left = '100px';
            
             // Limpar plataformas e moedas existentes
-            document.querySelectorAll('.platform, .coin, .cloud').forEach(el => el.remove());
+            document.querySelectorAll('.platform, .moving-platform, .coin, .cloud').forEach(el => el.remove());
             platforms = [];
+            movingPlatforms = [];
             coins = [];
            
             // Criar plataformas
             createPlatform(0, 450, 800, 50); // Chão
+            
+            // Plataformas principais
             createPlatform(100, 350, 200, 20);
             createPlatform(400, 250, 200, 20);
             createPlatform(200, 150, 150, 20);
             createPlatform(600, 350, 150, 20);
+            
+            // Novas plataformas adicionadas
+            createPlatform(50, 300, 100, 20);
+            createPlatform(300, 400, 120, 20);
+            createPlatform(500, 200, 150, 20);
+            createPlatform(650, 100, 120, 20);
+            createPlatform(350, 100, 100, 20);
+            createPlatform(200, 350, 80, 20);
+            createPlatform(700, 250, 80, 20);
+            createPlatform(0, 200, 100, 20);
+            
+            // Plataformas móveis
+            createMovingPlatform(250, 320, 100, 20, 250, 450, 2);
+            createMovingPlatform(500, 380, 80, 20, 380, 500, 3);
            
             // Criar moedas
             createCoin(150, 310);
@@ -350,11 +327,20 @@
             createCoin(250, 110);
             createCoin(650, 310);
             createCoin(300, 310);
+            createCoin(80, 270);
+            createCoin(550, 170);
+            createCoin(680, 70);
+            createCoin(380, 70);
+            createCoin(230, 320);
+            createCoin(730, 220);
+            createCoin(40, 170);
            
             // Criar nuvens
             createCloud(100, 50, 60);
             createCloud(300, 80, 40);
             createCloud(600, 60, 70);
+            createCloud(500, 30, 50);
+            createCloud(200, 40, 45);
            
             // Iniciar o loop do jogo
             if (gameLoopId) cancelAnimationFrame(gameLoopId);
@@ -366,6 +352,7 @@
             if (!gameRunning) return;
            
             updateKittyPosition();
+            updateMovingPlatforms();
             checkCollisions();
             checkGameStatus();
            
@@ -386,6 +373,22 @@
                     newTop = parseInt(platform.style.top) - 70;
                     kittyVelocityY = 0;
                     isJumping = false;
+                    break;
+                }
+            }
+            
+            // Verificar colisão com plataformas móveis
+            for (let platform of movingPlatforms) {
+                if (isOnPlatform(helloKitty, platform.element)) {
+                    onPlatform = true;
+                    newTop = parseInt(platform.element.style.top) - 70;
+                    kittyVelocityY = 0;
+                    isJumping = false;
+                    
+                    // Movimentar a Hello Kitty junto com a plataforma
+                    if (platform.direction === 'horizontal') {
+                        helloKitty.style.left = (parseInt(helloKitty.style.left) + platform.speed) + 'px';
+                    }
                     break;
                 }
             }
@@ -411,6 +414,23 @@
            
             // Reduzir velocidade horizontal (atrito)
             kittyVelocityX *= 0.9;
+        }
+       
+        // Atualizar plataformas móveis
+        function updateMovingPlatforms() {
+            for (let platform of movingPlatforms) {
+                let currentPos = parseInt(platform.element.style[platform.direction === 'horizontal' ? 'left' : 'top']);
+                
+                // Verificar se precisa inverter a direção
+                if (currentPos <= platform.min) {
+                    platform.speed = Math.abs(platform.speed);
+                } else if (currentPos >= platform.max) {
+                    platform.speed = -Math.abs(platform.speed);
+                }
+                
+                // Atualizar posição
+                platform.element.style[platform.direction === 'horizontal' ? 'left' : 'top'] = (currentPos + platform.speed) + 'px';
+            }
         }
        
         // Verificar se está em uma plataforma
@@ -469,48 +489,8 @@
         function checkGameStatus() {
             // Verificar se a Hello Kitty caiu
             if (parseInt(helloKitty.style.top) > 450) {
-                handleFall();
-            }
-        }
-       
-        // Manipular a queda da Hello Kitty
-        function handleFall() {
-            attempts--;
-            attemptsDisplay.textContent = attempts;
-            
-            if (attempts <= 0) {
                 endGame();
-            } else {
-                // Mostrar notificação de reinício
-                restartNotification.style.display = 'block';
-                gameRunning = false;
-                
-                let countdown = 3;
-                countdownDisplay.textContent = countdown;
-                
-                clearInterval(restartCountdown);
-                restartCountdown = setInterval(() => {
-                    countdown--;
-                    countdownDisplay.textContent = countdown;
-                    
-                    if (countdown <= 0) {
-                        clearInterval(restartCountdown);
-                        restartNotification.style.display = 'none';
-                        resetKittyPosition();
-                        gameRunning = true;
-                        gameLoop();
-                    }
-                }, 1000);
             }
-        }
-        
-        // Reiniciar a posição da Hello Kitty
-        function resetKittyPosition() {
-            helloKitty.style.top = '300px';
-            helloKitty.style.left = '100px';
-            kittyVelocityY = 0;
-            kittyVelocityX = 0;
-            isJumping = false;
         }
        
         // Finalizar o jogo
@@ -538,6 +518,25 @@
             platforms.push(platform);
         }
        
+        // Criar plataforma móvel
+        function createMovingPlatform(x, y, width, height, min, max, speed, direction = 'horizontal') {
+            let platform = document.createElement('div');
+            platform.className = 'moving-platform';
+            platform.style.left = x + 'px';
+            platform.style.top = y + 'px';
+            platform.style.width = width + 'px';
+            platform.style.height = height + 'px';
+            gameContainer.appendChild(platform);
+            
+            movingPlatforms.push({
+                element: platform,
+                min: min,
+                max: max,
+                speed: speed,
+                direction: direction
+            });
+        }
+       
         // Criar moeda
         function createCoin(x, y) {
             let coin = document.createElement('div');
@@ -561,17 +560,14 @@
        
         // Movimentação
         function moveLeft() {
-            if (!gameRunning) return;
             kittyVelocityX = -5;
         }
        
         function moveRight() {
-            if (!gameRunning) return;
             kittyVelocityX = 5;
         }
        
         function jump() {
-            if (!gameRunning) return;
             if (!isJumping) {
                 kittyVelocityY = -12;
                 isJumping = true;
