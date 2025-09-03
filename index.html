@@ -19,6 +19,7 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            touch-action: manipulation;
         }
        
         #game-container {
@@ -229,6 +230,36 @@
             padding: 10px 20px;
             font-size: 16px;
         }
+
+        /* Melhorias para mobile */
+        @media (max-width: 850px) {
+            #game-container {
+                width: 95vw;
+                height: 80vh;
+                max-height: 500px;
+            }
+            
+            h1 {
+                font-size: 36px;
+            }
+            
+            h2 {
+                font-size: 28px;
+            }
+            
+            p {
+                font-size: 16px;
+            }
+            
+            #controls {
+                bottom: 10px;
+            }
+            
+            #controls button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -255,9 +286,9 @@
         </div>
        
         <div id="controls">
-            <button onclick="moveLeft()">Esquerda ←</button>
-            <button onclick="moveRight()">Direita →</button>
-            <button onclick="jump()">Pular ↑</button>
+            <button onmousedown="moveLeft()" ontouchstart="moveLeft()" ontouchend="stopHorizontal()">Esquerda ←</button>
+            <button onmousedown="moveRight()" ontouchstart="moveRight()" ontouchend="stopHorizontal()">Direita →</button>
+            <button onmousedown="jump()" ontouchstart="jump()">Pular ↑</button>
         </div>
     </div>
 
@@ -274,11 +305,13 @@
         let platforms = [];
         let movingPlatforms = [];
         let coins = [];
+        let clouds = [];
         let kittyVelocityY = 0;
         let kittyVelocityX = 0;
         let isJumping = false;
         let gravity = 0.5;
         let gameLoopId;
+        let keysPressed = {};
        
         // Inicializar o jogo
         function startGame() {
@@ -287,16 +320,18 @@
             scoreDisplay.textContent = score;
             startScreen.style.display = 'none';
             gameOverScreen.style.display = 'none';
+            keysPressed = {};
            
             // Reposicionar Hello Kitty
             helloKitty.style.top = '300px';
             helloKitty.style.left = '100px';
            
-            // Limpar plataformas e moedas existentes
+            // Limpar plataformas, moedas e nuvens existentes
             document.querySelectorAll('.platform, .moving-platform, .coin, .cloud').forEach(el => el.remove());
             platforms = [];
             movingPlatforms = [];
             coins = [];
+            clouds = [];
            
             // Criar plataformas
             createPlatform(0, 450, 800, 50); // Chão
@@ -351,6 +386,10 @@
         function gameLoop() {
             if (!gameRunning) return;
            
+            // Atualizar movimento baseado em teclas pressionadas
+            if (keysPressed['ArrowLeft'] || keysPressed['a']) moveLeft();
+            if (keysPressed['ArrowRight'] || keysPressed['d']) moveRight();
+            
             updateKittyPosition();
             updateMovingPlatforms();
             checkCollisions();
@@ -412,8 +451,11 @@
            
             helloKitty.style.left = newLeft + 'px';
            
-            // Reduzir velocidade horizontal (atrito)
-            kittyVelocityX *= 0.9;
+            // Reduzir velocidade horizontal (atrito) se nenhuma tecla estiver pressionada
+            if (!keysPressed['ArrowLeft'] && !keysPressed['ArrowRight'] && 
+                !keysPressed['a'] && !keysPressed['d']) {
+                kittyVelocityX *= 0.9;
+            }
         }
        
         // Atualizar plataformas móveis
@@ -445,9 +487,9 @@
            
             return (
                 kittyBottom >= platformTop &&
-                kittyBottom <= platformTop + 10 &&
-                kittyRight > platformLeft &&
-                kittyLeft < platformRight &&
+                kittyBottom <= platformTop + 15 && // Aumentei a margem para melhor detecção
+                kittyRight > platformLeft + 5 && // Ajuste fino para melhor colisão
+                kittyLeft < platformRight - 5 &&
                 kittyVelocityY > 0
             );
         }
@@ -556,6 +598,7 @@
             cloud.style.width = size + 'px';
             cloud.style.height = size/2 + 'px';
             gameContainer.appendChild(cloud);
+            clouds.push(cloud);
         }
        
         // Movimentação
@@ -565,6 +608,10 @@
        
         function moveRight() {
             kittyVelocityX = 5;
+        }
+        
+        function stopHorizontal() {
+            kittyVelocityX = 0;
         }
        
         function jump() {
@@ -577,10 +624,16 @@
         // Controles de teclado
         document.addEventListener('keydown', (e) => {
             if (!gameRunning) return;
+            
+            keysPressed[e.key] = true;
            
-            if (e.key === 'ArrowLeft') moveLeft();
-            if (e.key === 'ArrowRight') moveRight();
-            if (e.key === ' ' || e.key === 'ArrowUp') jump();
+            if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w') {
+                jump();
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keysPressed[e.key] = false;
         });
        
         // Inicializar o jogo
@@ -589,6 +642,13 @@
             helloKitty.style.top = '300px';
             helloKitty.style.left = '100px';
         };
+        
+        // Prevenir scroll na tela ao usar setas e espaço
+        window.addEventListener('keydown', function(e) {
+            if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'a', 'd', 'w'].includes(e.key)) {
+                e.preventDefault();
+            }
+        }, false);
     </script>
 </body>
 </html>
