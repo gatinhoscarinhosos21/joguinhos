@@ -230,14 +230,14 @@
             font-size: 16px;
         }
 
-        /* Efeito de perder pontos */
-        @keyframes losePoints {
-            0% { background-color: rgba(255, 150, 150, 0.7); }
-            100% { background-color: rgba(255, 255, 255, 0.8); }
+        /* Efeito de queda */
+        @keyframes fall {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(90deg); }
         }
         
-        .lose-points {
-            animation: losePoints 0.5s;
+        .falling {
+            animation: fall 0.5s forwards;
         }
     </style>
 </head>
@@ -254,13 +254,13 @@
        
         <div id="start-screen">
             <h1>Hello Kitty Adventure</h1>
-            <p>Use as setas do teclado para mover e a barra de espaço para pular. Colete moedas e evite cair! Cuidado: você perde 5 pontos cada vez que cai de uma plataforma.</p>
+            <p>Use as setas do teclado para mover e a barra de espaço para pular. Colete moedas e não caia das plataformas!</p>
             <button onclick="startGame()">Começar Jogo</button>
         </div>
        
         <div id="game-over">
             <h2>Fim de Jogo!</h2>
-            <p>Sua pontuação: <span id="final-score">0</span></p>
+            <p>Hello Kitty caiu! Sua pontuação: <span id="final-score">0</span></p>
             <button onclick="restartGame()">Jogar Novamente</button>
         </div>
        
@@ -278,7 +278,6 @@
         let helloKitty = document.getElementById('hello-kitty');
         let gameContainer = document.getElementById('game-container');
         let scoreDisplay = document.getElementById('score');
-        let scoreContainer = document.getElementById('score-container');
         let finalScoreDisplay = document.getElementById('final-score');
         let startScreen = document.getElementById('start-screen');
         let gameOverScreen = document.getElementById('game-over');
@@ -290,8 +289,6 @@
         let isJumping = false;
         let gravity = 0.5;
         let gameLoopId;
-        let wasOnPlatform = true; // Controla se estava em uma plataforma no frame anterior
-        let pointsLostForThisFall = false; // Controla se já perdeu pontos nesta queda
        
         // Inicializar o jogo
         function startGame() {
@@ -300,8 +297,10 @@
             scoreDisplay.textContent = score;
             startScreen.style.display = 'none';
             gameOverScreen.style.display = 'none';
-            wasOnPlatform = true;
-            pointsLostForThisFall = false;
+           
+            // Remover efeito de queda se houver
+            helloKitty.classList.remove('falling');
+            helloKitty.style.transform = 'rotate(0deg)';
            
             // Reposicionar Hello Kitty
             helloKitty.style.top = '300px';
@@ -388,11 +387,6 @@
                     newTop = parseInt(platform.style.top) - 70;
                     kittyVelocityY = 0;
                     isJumping = false;
-                    
-                    // Se acabou de pousar em uma plataforma após uma queda
-                    if (!wasOnPlatform && pointsLostForThisFall) {
-                        pointsLostForThisFall = false;
-                    }
                     break;
                 }
             }
@@ -405,11 +399,6 @@
                     kittyVelocityY = 0;
                     isJumping = false;
                     
-                    // Se acabou de pousar em uma plataforma após uma queda
-                    if (!wasOnPlatform && pointsLostForThisFall) {
-                        pointsLostForThisFall = false;
-                    }
-                    
                     // Movimentar a Hello Kitty junto com a plataforma
                     if (platform.direction === 'horizontal') {
                         helloKitty.style.left = (parseInt(helloKitty.style.left) + platform.speed) + 'px';
@@ -417,15 +406,6 @@
                     break;
                 }
             }
-            
-            // Verificar se acabou de cair de uma plataforma
-            if (wasOnPlatform && !onPlatform && kittyVelocityY > 0 && !pointsLostForThisFall) {
-                losePoints(5);
-                pointsLostForThisFall = true;
-            }
-            
-            // Atualizar o status para o próximo frame
-            wasOnPlatform = onPlatform;
            
             // Limitar movimento vertical
             if (newTop > 430) {
@@ -448,18 +428,6 @@
            
             // Reduzir velocidade horizontal (atrito)
             kittyVelocityX *= 0.9;
-        }
-       
-        // Função para perder pontos
-        function losePoints(amount) {
-            score = Math.max(0, score - amount); // Garante que a pontuação não fique negativa
-            scoreDisplay.textContent = score;
-            
-            // Efeito visual
-            scoreContainer.classList.add('lose-points');
-            setTimeout(() => {
-                scoreContainer.classList.remove('lose-points');
-            }, 500);
         }
        
         // Atualizar plataformas móveis
@@ -533,9 +501,15 @@
        
         // Verificar status do jogo
         function checkGameStatus() {
-            // Verificar se a Hello Kitty caiu
-            if (parseInt(helloKitty.style.top) > 450) {
-                endGame();
+            // Verificar se a Hello Kitty caiu (atingiu o "chão" do jogo)
+            if (parseInt(helloKitty.style.top) >= 430) {
+                // Aplicar efeito visual de queda
+                helloKitty.classList.add('falling');
+                
+                // Finalizar o jogo após breve delay para a animação
+                setTimeout(() => {
+                    endGame();
+                }, 500);
             }
         }
        
@@ -606,14 +580,17 @@
        
         // Movimentação
         function moveLeft() {
+            if (!gameRunning) return;
             kittyVelocityX = -5;
         }
        
         function moveRight() {
+            if (!gameRunning) return;
             kittyVelocityX = 5;
         }
        
         function jump() {
+            if (!gameRunning) return;
             if (!isJumping) {
                 kittyVelocityY = -12;
                 isJumping = true;
