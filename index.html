@@ -1,640 +1,663 @@
- <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello Kitty Adventure</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-       
-        body {
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            background: linear-gradient(to bottom, #ffcce6, #ff99cc);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-       
-        #game-container {
-            position: relative;
-            width: 800px;
-            height: 500px;
-            background: linear-gradient(to bottom, #87ceeb, #e0f7ff);
-            border: 5px solid #ff66a3;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-        }
-       
-        #hello-kitty {
-            position: absolute;
-            width: 50px;
-            height: 70px;
-            background: #ff99cc;
-            border-radius: 50% 50% 40% 40%;
-            top: 300px;
-            left: 100px;
-            z-index: 100;
-            transition: transform 0.2s;
-        }
-       
-        /* Orelhas */
-        #hello-kitty::before, #hello-kitty::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #ff99cc;
-            border-radius: 50%;
-            top: -10px;
-        }
-       
-        #hello-kitty::before {
-            left: 5px;
-            transform: rotate(-20deg);
-        }
-       
-        #hello-kitty::after {
-            right: 5px;
-            transform: rotate(20deg);
-        }
-       
-        /* Laço */
-        .bow {
-            position: absolute;
-            width: 25px;
-            height: 25px;
-            background: #ff4d94;
-            border-radius: 50%;
-            top: 5px;
-            left: 12px;
-            transform: rotate(45deg);
-            z-index: 101;
-        }
-       
-        /* Olhos */
-        .eye {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: black;
-            border-radius: 50%;
-            top: 25px;
-            z-index: 102;
-        }
-       
-        .eye.left { left: 15px; }
-        .eye.right { right: 15px; }
-       
-        /* Nariz */
-        .nose {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: #ffb3d9;
-            border-radius: 50%;
-            top: 35px;
-            left: 21px;
-            z-index: 102;
-        }
-       
-        .platform {
-            position: absolute;
-            background: #8aed86;
-            border: 3px solid #6cc768;
-            border-radius: 10px;
-        }
-       
-        .moving-platform {
-            position: absolute;
-            background: #86c8ed;
-            border: 3px solid #5ca0cc;
-            border-radius: 10px;
-        }
-       
-        .coin {
-            position: absolute;
-            width: 25px;
-            height: 25px;
-            background: radial-gradient(circle at 30% 30%, #ffd700, #ff8c00);
-            border-radius: 50%;
-            animation: spin 2s linear infinite;
-            box-shadow: 0 0 8px #ffaa00;
-            z-index: 90;
-        }
-       
-        @keyframes spin {
-            0% { transform: rotateY(0deg); }
-            100% { transform: rotateY(360deg); }
-        }
-       
-        #score-container {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-size: 20px;
-            color: #ff66a3;
-            font-weight: bold;
-            z-index: 200;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-       
-        #start-screen, #game-over {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 204, 230, 0.95);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 300;
-        }
-       
-        #game-over {
-            display: none;
-        }
-       
-        h1 {
-            color: #ff66a3;
-            font-size: 48px;
-            margin-bottom: 20px;
-            text-shadow: 3px 3px 0 #fff;
-        }
-       
-        h2 {
-            color: #ff66a3;
-            font-size: 36px;
-            margin-bottom: 30px;
-        }
-       
-        p {
-            color: #ff3385;
-            font-size: 20px;
-            margin-bottom: 30px;
-            text-align: center;
-            max-width: 80%;
-        }
-       
-        button {
-            padding: 15px 30px;
-            font-size: 20px;
-            background: #ff66a3;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: bold;
-            box-shadow: 0 5px 0 #cc3380;
-        }
-       
-        button:hover {
-            background: #ff4d94;
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 #cc3380;
-        }
-       
-        .cloud {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.8;
-            z-index: 1;
-        }
-       
-        #controls {
-            position: absolute;
-            bottom: 15px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            z-index: 200;
-        }
-       
-        #controls button {
-            padding: 10px 20px;
-            font-size: 16px;
-        }
-
-        /* Efeito de perder pontos */
-        @keyframes losePoints {
-            0% { background-color: rgba(255, 150, 150, 0.7); }
-            100% { background-color: rgba(255, 255, 255, 0.8); }
-        }
-        
-        .lose-points {
-            animation: losePoints 0.5s;
-        }
-    </style>
-</head>
-<body>
-    <div id="game-container">
-        <div id="hello-kitty">
-            <div class="bow"></div>
-            <div class="eye left"></div>
-            <div class="eye right"></div>
-            <div class="nose"></div>
-        </div>
-       
-        <div id="score-container">Pontuação: <span id="score">0</span></div>
-       
-        <div id="start-screen">
-            <h1>Hello Kitty Adventure</h1>
-            <p>Use as setas do teclado para mover e a barra de espaço para pular. Colete moedas e evite cair! Cuidado: você perde 5 pontos cada vez que cai de uma plataforma.</p>
-            <button onclick="startGame()">Começar Jogo</button>
-        </div>
-       
-        <div id="game-over">
-            <h2>Fim de Jogo!</h2>
-            <p>Sua pontuação: <span id="final-score">0</span></p>
-            <button onclick="restartGame()">Jogar Novamente</button>
-        </div>
-       
-        <div id="controls">
-            <button onclick="moveLeft()">Esquerda ←</button>
-            <button onclick="moveRight()">Direita →</button>
-            <button onclick="jump()">Pular ↑</button>
-        </div>
-    </div>
-
-    <script>
-        // Variáveis do jogo
-        let score = 0;
-        let gameRunning = false;
-        let helloKitty = document.getElementById('hello-kitty');
-        let gameContainer = document.getElementById('game-container');
-        let scoreDisplay = document.getElementById('score');
-        let scoreContainer = document.getElementById('score-container');
-        let finalScoreDisplay = document.getElementById('final-score');
-        let startScreen = document.getElementById('start-screen');
-        let gameOverScreen = document.getElementById('game-over');
-        let platforms = [];
-        let movingPlatforms = [];
-        let coins = [];
-        let kittyVelocityY = 0;
-        let kittyVelocityX = 0;
-        let isJumping = false;
-        let gravity = 0.5;
-        let gameLoopId;
-        let wasOnPlatform = true; // Controla se estava em uma plataforma no frame anterior
-        let pointsLostForThisFall = false; // Controla se já perdeu pontos nesta queda
-       
-        // Inicializar o jogo
-        function startGame() {
-            score = 0;
-            gameRunning = true;
-            scoreDisplay.textContent = score;
-            startScreen.style.display = 'none';
-            gameOverScreen.style.display = 'none';
-            wasOnPlatform = true;
-            pointsLostForThisFall = false;
-           
-            // Reposicionar Hello Kitty
-            helloKitty.style.top = '300px';
-            helloKitty.style.left = '100px';
-           
-            // Limpar plataformas e moedas existentes
-            document.querySelectorAll('.platform, .moving-platform, .coin, .cloud').forEach(el => el.remove());
-            platforms = [];
-            movingPlatforms = [];
-            coins = [];
-           
-            // Criar plataformas
-            createPlatform(0, 450, 800, 50); // Chão
-            
-            // Plataformas principais
-            createPlatform(100, 350, 200, 20);
-            createPlatform(400, 250, 200, 20);
-            createPlatform(200, 150, 150, 20);
-            createPlatform(600, 350, 150, 20);
-            
-            // Novas plataformas adicionadas
-            createPlatform(50, 300, 100, 20);
-            createPlatform(300, 400, 120, 20);
-            createPlatform(500, 200, 150, 20);
-            createPlatform(650, 100, 120, 20);
-            createPlatform(350, 100, 100, 20);
-            createPlatform(200, 350, 80, 20);
-            createPlatform(700, 250, 80, 20);
-            createPlatform(0, 200, 100, 20);
-            
-            // Plataformas móveis
-            createMovingPlatform(250, 320, 100, 20, 250, 450, 2);
-            createMovingPlatform(500, 380, 80, 20, 380, 500, 3);
-           
-            // Criar moedas
-            createCoin(150, 310);
-            createCoin(450, 210);
-            createCoin(250, 110);
-            createCoin(650, 310);
-            createCoin(300, 310);
-            createCoin(80, 270);
-            createCoin(550, 170);
-            createCoin(680, 70);
-            createCoin(380, 70);
-            createCoin(230, 320);
-            createCoin(730, 220);
-            createCoin(40, 170);
-           
-            // Criar nuvens
-            createCloud(100, 50, 60);
-            createCloud(300, 80, 40);
-            createCloud(600, 60, 70);
-            createCloud(500, 30, 50);
-            createCloud(200, 40, 45);
-           
-            // Iniciar o loop do jogo
-            if (gameLoopId) cancelAnimationFrame(gameLoopId);
-            gameLoop();
-        }
-       
-        // Loop principal do jogo
-        function gameLoop() {
-            if (!gameRunning) return;
-           
-            updateKittyPosition();
-            updateMovingPlatforms();
-            checkCollisions();
-            checkGameStatus();
-           
-            gameLoopId = requestAnimationFrame(gameLoop);
-        }
-       
-        // Atualizar a posição da Hello Kitty
-        function updateKittyPosition() {
-            // Aplicar gravidade
-            kittyVelocityY += gravity;
-            let newTop = parseInt(helloKitty.style.top) + kittyVelocityY;
-           
-            // Verificar colisão com plataformas
-            let onPlatform = false;
-            for (let platform of platforms) {
-                if (isOnPlatform(helloKitty, platform)) {
-                    onPlatform = true;
-                    newTop = parseInt(platform.style.top) - 70;
-                    kittyVelocityY = 0;
-                    isJumping = false;
-                    
-                    // Se acabou de pousar em uma plataforma após uma queda
-                    if (!wasOnPlatform && pointsLostForThisFall) {
-                        pointsLostForThisFall = false;
-                    }
-                    break;
-                }
-            }
-            
-            // Verificar colisão com plataformas móveis
-            for (let platform of movingPlatforms) {
-                if (isOnPlatform(helloKitty, platform.element)) {
-                    onPlatform = true;
-                    newTop = parseInt(platform.element.style.top) - 70;
-                    kittyVelocityY = 0;
-                    isJumping = false;
-                    
-                    // Se acabou de pousar em uma plataforma após uma queda
-                    if (!wasOnPlatform && pointsLostForThisFall) {
-                        pointsLostForThisFall = false;
-                    }
-                    
-                    // Movimentar a Hello Kitty junto com a plataforma
-                    if (platform.direction === 'horizontal') {
-                        helloKitty.style.left = (parseInt(helloKitty.style.left) + platform.speed) + 'px';
-                    }
-                    break;
-                }
-            }
-            
-            // Verificar se acabou de cair de uma plataforma
-            if (wasOnPlatform && !onPlatform && kittyVelocityY > 0 && !pointsLostForThisFall) {
-                losePoints(5);
-                pointsLostForThisFall = true;
-            }
-            
-            // Atualizar o status para o próximo frame
-            wasOnPlatform = onPlatform;
-           
-            // Limitar movimento vertical
-            if (newTop > 430) {
-                newTop = 430;
-                kittyVelocityY = 0;
-                isJumping = false;
-            }
-           
-            // Atualizar posição vertical
-            helloKitty.style.top = newTop + 'px';
-           
-            // Atualizar posição horizontal
-            let newLeft = parseInt(helloKitty.style.left) + kittyVelocityX;
-           
-            // Limitar movimento horizontal
-            if (newLeft < 0) newLeft = 0;
-            if (newLeft > 750) newLeft = 750;
-           
-            helloKitty.style.left = newLeft + 'px';
-           
-            // Reduzir velocidade horizontal (atrito)
-            kittyVelocityX *= 0.9;
-        }
-       
-        // Função para perder pontos
-        function losePoints(amount) {
-            score = Math.max(0, score - amount); // Garante que a pontuação não fique negativa
-            scoreDisplay.textContent = score;
-            
-            // Efeito visual
-            scoreContainer.classList.add('lose-points');
-            setTimeout(() => {
-                scoreContainer.classList.remove('lose-points');
-            }, 500);
-        }
-       
-        // Atualizar plataformas móveis
-        function updateMovingPlatforms() {
-            for (let platform of movingPlatforms) {
-                let currentPos = parseInt(platform.element.style[platform.direction === 'horizontal' ? 'left' : 'top']);
-                
-                // Verificar se precisa inverter a direção
-                if (currentPos <= platform.min) {
-                    platform.speed = Math.abs(platform.speed);
-                } else if (currentPos >= platform.max) {
-                    platform.speed = -Math.abs(platform.speed);
-                }
-                
-                // Atualizar posição
-                platform.element.style[platform.direction === 'horizontal' ? 'left' : 'top'] = (currentPos + platform.speed) + 'px';
-            }
-        }
-       
-        // Verificar se está em uma plataforma
-        function isOnPlatform(kitty, platform) {
-            let kittyBottom = parseInt(kitty.style.top) + 70;
-            let kittyLeft = parseInt(kitty.style.left);
-            let kittyRight = kittyLeft + 50;
-           
-            let platformTop = parseInt(platform.style.top);
-            let platformLeft = parseInt(platform.style.left);
-            let platformRight = platformLeft + parseInt(platform.style.width);
-           
-            return (
-                kittyBottom >= platformTop &&
-                kittyBottom <= platformTop + 10 &&
-                kittyRight > platformLeft &&
-                kittyLeft < platformRight &&
-                kittyVelocityY > 0
-            );
-        }
-       
-        // Verificar colisões com moedas
-        function checkCollisions() {
-            for (let i = coins.length - 1; i >= 0; i--) {
-                let coin = coins[i];
-               
-                if (isColliding(helloKitty, coin)) {
-                    coin.remove();
-                    coins.splice(i, 1);
-                    score += 10;
-                    scoreDisplay.textContent = score;
-                   
-                    // Efeito visual ao coletar moeda
-                    helloKitty.style.transform = 'scale(1.2)';
-                    setTimeout(() => {
-                        helloKitty.style.transform = 'scale(1)';
-                    }, 200);
-                }
-            }
-        }
-       
-        // Verificar colisão entre dois elementos
-        function isColliding(el1, el2) {
-            let rect1 = el1.getBoundingClientRect();
-            let rect2 = el2.getBoundingClientRect();
-           
-            return (
-                rect1.left < rect2.right &&
-                rect1.right > rect2.left &&
-                rect1.top < rect2.bottom &&
-                rect1.bottom > rect2.top
-            );
-        }
-       
-        // Verificar status do jogo
-        function checkGameStatus() {
-            // Verificar se a Hello Kitty caiu
-            if (parseInt(helloKitty.style.top) > 450) {
-                endGame();
-            }
-        }
-       
-        // Finalizar o jogo
-        function endGame() {
-            gameRunning = false;
-            finalScoreDisplay.textContent = score;
-            gameOverScreen.style.display = 'flex';
-            cancelAnimationFrame(gameLoopId);
-        }
-       
-        // Reiniciar o jogo
-        function restartGame() {
-            startGame();
-        }
-       
-        // Criar plataforma
-        function createPlatform(x, y, width, height) {
-            let platform = document.createElement('div');
-            platform.className = 'platform';
-            platform.style.left = x + 'px';
-            platform.style.top = y + 'px';
-            platform.style.width = width + 'px';
-            platform.style.height = height + 'px';
-            gameContainer.appendChild(platform);
-            platforms.push(platform);
-        }
-       
-        // Criar plataforma móvel
-        function createMovingPlatform(x, y, width, height, min, max, speed, direction = 'horizontal') {
-            let platform = document.createElement('div');
-            platform.className = 'moving-platform';
-            platform.style.left = x + 'px';
-            platform.style.top = y + 'px';
-            platform.style.width = width + 'px';
-            platform.style.height = height + 'px';
-            gameContainer.appendChild(platform);
-            
-            movingPlatforms.push({
-                element: platform,
-                min: min,
-                max: max,
-                speed: speed,
-                direction: direction
-            });
-        }
-       
-        // Criar moeda
-        function createCoin(x, y) {
-            let coin = document.createElement('div');
-            coin.className = 'coin';
-            coin.style.left = x + 'px';
-            coin.style.top = y + 'px';
-            gameContainer.appendChild(coin);
-            coins.push(coin);
-        }
-       
-        // Criar nuvem
-        function createCloud(x, y, size) {
-            let cloud = document.createElement('div');
-            cloud.className = 'cloud';
-            cloud.style.left = x + 'px';
-            cloud.style.top = y + 'px';
-            cloud.style.width = size + 'px';
-            cloud.style.height = size/2 + 'px';
-            gameContainer.appendChild(cloud);
-        }
-       
-        // Movimentação
-        function moveLeft() {
-            kittyVelocityX = -5;
-        }
-       
-        function moveRight() {
-            kittyVelocityX = 5;
-        }
-       
-        function jump() {
-            if (!isJumping) {
-                kittyVelocityY = -12;
-                isJumping = true;
-            }
-        }
-       
-        // Controles de teclado
-        document.addEventListener('keydown', (e) => {
-            if (!gameRunning) return;
-           
-            if (e.key === 'ArrowLeft') moveLeft();
-            if (e.key === 'ArrowRight') moveRight();
-            if (e.key === ' ' || e.key === 'ArrowUp') jump();
-        });
-       
-        // Inicializar o jogo
-        window.onload = function() {
-            // Posicionar Hello Kitty
-            helloKitty.style.top = '300px';
-            helloKitty.style.left = '100px';
-        };
-    </script>
-</body>
-</html>
+ <!DOCTYPE html>  
+<html lang="pt-br">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Hello Kitty Adventure</title>  
+    <style>  
+        * {  
+            margin: 0;  
+            padding: 0;  
+            box-sizing: border-box;  
+        }  
+  
+        body {  
+            font-family: 'Comic Sans MS', cursive, sans-serif;  
+            background: linear-gradient(to bottom, #ffcce6, #ff99cc);  
+            min-height: 100vh;  
+            display: flex;  
+            justify-content: center;  
+            align-items: center;  
+            overflow: hidden;  
+        }  
+  
+        #game-container {  
+            position: relative;  
+            width: 800px;  
+            height: 500px;  
+            background: linear-gradient(to bottom, #87ceeb, #e0f7ff);  
+            border: 5px solid #ff66a3;  
+            border-radius: 10px;  
+            overflow: hidden;  
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);  
+        }  
+  
+        #hello-kitty {  
+            position: absolute;  
+            width: 50px;  
+            height: 70px;  
+            background: #ff99cc;  
+            border-radius: 50% 50% 40% 40%;  
+            top: 300px;  
+            left: 100px;  
+            z-index: 100;  
+            transition: transform 0.2s;  
+        }  
+  
+        /* Orelhas */  
+        #hello-kitty::before, #hello-kitty::after {  
+            content: '';  
+            position: absolute;  
+            width: 20px;  
+            height: 20px;  
+            background: #ff99cc;  
+            border-radius: 50%;  
+            top: -10px;  
+        }  
+  
+        #hello-kitty::before {  
+            left: 5px;  
+            transform: rotate(-20deg);  
+        }  
+  
+        #hello-kitty::after {  
+            right: 5px;  
+            transform: rotate(20deg);  
+        }  
+  
+        /* Laço */  
+        .bow {  
+            position: absolute;  
+            width: 25px;  
+            height: 25px;  
+            background: #ff4d94;  
+            border-radius: 50%;  
+            top: 5px;  
+            left: 12px;  
+            transform: rotate(45deg);  
+            z-index: 101;  
+        }  
+  
+        /* Olhos */  
+        .eye {  
+            position: absolute;  
+            width: 6px;  
+            height: 6px;  
+            background: black;  
+            border-radius: 50%;  
+            top: 25px;  
+            z-index: 102;  
+        }  
+  
+        .eye.left { left: 15px; }  
+        .eye.right { right: 15px; }  
+  
+        /* Nariz */  
+        .nose {  
+            position: absolute;  
+            width: 8px;  
+            height: 8px;  
+            background: #ffb3d9;  
+            border-radius: 50%;  
+            top: 35px;  
+            left: 21px;  
+            z-index: 102;  
+        }  
+  
+       .platform {  
+            position: absolute;  
+            background: #8aed86;  
+            border: 3px solid #6cc768;  
+            border-radius: 10px;  
+            transition: background-color 0.3s ease; /* Transição suave */  
+            cursor: pointer; /* Altera o cursor para indicar interatividade */  
+        }  
+  
+        .platform:hover {  
+            background-color: #6cc768; /* Cor mais escura no hover */  
+        }  
+  
+        .platform:active {  
+            background-color: #4caf50; /* Cor mais escura ainda ao clicar */  
+        }  
+  
+        .moving-platform {  
+            position: absolute;  
+            background: #86c8ed;  
+            border: 3px solid #5ca0cc;  
+            border-radius: 10px;  
+        }  
+  
+        .coin {  
+            position: absolute;  
+            width: 25px;  
+            height: 25px;  
+            background: radial-gradient(circle at 30% 30%, #ffd700, #ff8c00);  
+            border-radius: 50%;  
+            animation: spin 2s linear infinite;  
+            box-shadow: 0 0 8px #ffaa00;  
+            z-index: 90;  
+        }  
+  
+        @keyframes spin {  
+            0% { transform: rotateY(0deg); }  
+            100% { transform: rotateY(360deg); }  
+        }  
+  
+        #score-container {  
+            position: absolute;  
+            top: 15px;  
+            left: 15px;  
+            background: rgba(255, 255, 255, 0.8);  
+            padding: 10px 15px;  
+            border-radius: 20px;  
+            font-size: 20px;  
+            color: #ff66a3;  
+            font-weight: bold;  
+            z-index: 200;  
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);  
+        }  
+  
+        #start-screen, #game-over {  
+            position: absolute;  
+            top: 0;  
+            left: 0;  
+            width: 100%;  
+            height: 100%;  
+            background: rgba(255, 204, 230, 0.95);  
+            display: flex;  
+            flex-direction: column;  
+            justify-content: center;  
+            align-items: center;  
+            z-index: 300;  
+        }  
+  
+        #game-over {  
+            display: none;  
+        }  
+  
+        h1 {  
+            color: #ff66a3;  
+            font-size: 48px;  
+            margin-bottom: 20px;  
+            text-shadow: 3px 3px 0 #fff;  
+        }  
+  
+        h2 {  
+            color: #ff66a3;  
+            font-size: 36px;  
+            margin-bottom: 30px;  
+        }  
+  
+        p {  
+            color: #ff3385;  
+            font-size: 20px;  
+            margin-bottom: 30px;  
+            text-align: center;  
+            max-width: 80%;  
+        }  
+  
+        button {  
+            padding: 15px 30px;  
+            font-size: 20px;  
+            background: #ff66a3;  
+            color: white;  
+            border: none;  
+            border-radius: 50px;  
+            cursor: pointer;  
+            transition: all 0.3s;  
+            font-weight: bold;  
+            box-shadow: 0 5px 0 #cc3380;  
+        }  
+  
+        button:hover {  
+            background: #ff4d94;  
+            transform: translateY(3px);  
+            box-shadow: 0 2px 0 #cc3380;  
+        }  
+  
+        .cloud {  
+            position: absolute;  
+            background: white;  
+            border-radius: 50%;  
+            opacity: 0.8;  
+            z-index: 1;  
+        }  
+  
+        #controls {  
+            position: absolute;  
+            bottom: 15px;  
+            left: 0;  
+            width: 100%;  
+            display: flex;  
+            justify-content: center;  
+            gap: 15px;  
+            z-index: 200;  
+        }  
+  
+        #controls button {  
+            padding: 10px 20px;  
+            font-size: 16px;  
+        }  
+  
+        /* Efeito de queda */  
+        @keyframes fall {  
+            0% { transform: rotate(0deg); }  
+            100% { transform: rotate(90deg); }  
+        }  
+  
+        .falling {  
+            animation: fall 0.5s forwards;  
+        }  
+    </style>  
+</head>  
+<body>  
+    <div id="game-container">  
+        <div id="hello-kitty">  
+            <div class="bow"></div>  
+            <div class="eye left"></div>  
+            <div class="eye right"></div>  
+            <div class="nose"></div>  
+        </div>  
+  
+        <div id="score-container">Pontuação: <span id="score">0</span></div>  
+  
+        <div id="start-screen">  
+            <h1>Hello Kitty Adventure</h1>  
+            <p>Use as setas do teclado para mover e a barra de espaço para pular. Colete moedas e não caia das plataformas!</p>  
+            <button onclick="startGame()">Começar Jogo</button>  
+        </div>  
+  
+        <div id="game-over">  
+            <h2>Game Over!</h2>  
+            <p>Hello Kitty caiu! Sua pontuação: <span id="final-score">0</span></p>  
+            <button onclick="restartGame()">Jogar Novamente</button>  
+        </div>  
+  
+        <div id="controls">  
+            <button onclick="moveLeft()">Esquerda ←</button>  
+            <button onclick="moveRight()">Direita →</button>  
+            <button onclick="jump()">Pular ↑</button>  
+        </div>  
+    </div>  
+  
+    <script>  
+        // Variáveis do jogo  
+        let score = 0;  
+        let gameRunning = false;  
+        let helloKitty = document.getElementById('hello-kitty');  
+        let gameContainer = document.getElementById('game-container');  
+        let scoreDisplay = document.getElementById('score');  
+        let finalScoreDisplay = document.getElementById('final-score');  
+        let startScreen = document.getElementById('start-screen');  
+        let gameOverScreen = document.getElementById('game-over');  
+        let platforms = [];  
+        let movingPlatforms = [];  
+        let coins = [];  
+        let kittyVelocityY = 0;  
+        let kittyVelocityX = 0;  
+        let isJumping = false;  
+        let gravity = 0.5;  
+        let gameLoopId;  
+        let scoreLossInterval;  
+  
+        // Inicializar o jogo  
+        function startGame() {  
+            score = 0;  
+            gameRunning = true;  
+            scoreDisplay.textContent = score;  
+            startScreen.style.display = 'none';  
+            gameOverScreen.style.display = 'none';  
+  
+            // Remover efeito de queda se houver  
+            helloKitty.classList.remove('falling');  
+            helloKitty.style.transform = 'rotate(0deg)';  
+  
+            // Reposicionar Hello Kitty  
+            helloKitty.style.top = '300px';  
+            helloKitty.style.left = '100px';  
+  
+            // Limpar plataformas e moedas existentes  
+            document.querySelectorAll('.platform, .moving-platform, .coin, .cloud').forEach(el => el.remove());  
+            platforms = [];  
+            movingPlatforms = [];  
+            coins = [];  
+  
+            // Criar plataformas  
+            createPlatform(0, 450, 800, 50); // Chão  
+  
+            // Plataformas principais  
+            createPlatform(100, 350, 200, 20);  
+            createPlatform(400, 250, 200, 20);  
+            createPlatform(200, 150, 150, 20);  
+            createPlatform(600, 350, 150, 20);  
+  
+            // Novas plataformas adicionadas  
+            createPlatform(50, 300, 100, 20);  
+            createPlatform(300, 400, 120, 20);  
+            createPlatform(500, 200, 150, 20);  
+            createPlatform(650, 100, 120, 20);  
+            createPlatform(350, 100, 100, 20);  
+            createPlatform(200, 350, 80, 20);  
+            createPlatform(700, 250, 80, 20);  
+            createPlatform(0, 200, 100, 20);  
+  
+            // Plataformas móveis  
+            createMovingPlatform(250, 320, 100, 20, 250, 450, 2);  
+            createMovingPlatform(500, 380, 80, 20, 380, 500, 3);  
+  
+            // Criar moedas  
+            createCoin(150, 310);  
+            createCoin(450, 210);  
+            createCoin(250, 110);  
+            createCoin(650, 310);  
+            createCoin(300, 310);  
+            createCoin(80, 270);  
+            createCoin(550, 170);  
+            createCoin(680, 70);  
+            createCoin(380, 70);  
+            createCoin(230, 320);  
+            createCoin(730, 220);  
+            createCoin(40, 170);  
+  
+            // Criar nuvens  
+            createCloud(100, 50, 60);  
+            createCloud(300, 80, 40);  
+            createCloud(600, 60, 70);  
+            createCloud(500, 30, 50);  
+            createCloud(200, 40, 45);  
+  
+            // Iniciar o loop do jogo  
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);  
+            gameLoop();  
+  
+            // Iniciar a perda de pontos a cada segundo  
+            scoreLossInterval = setInterval(() => {  
+                if (gameRunning) {  
+                    updateScore(-1);  
+                }  
+            }, 1000);  
+        }  
+  
+         // Atualizar a pontuação  
+         function updateScore(points) {  
+            score += points;  
+            scoreDisplay.textContent = score;  
+        }  
+  
+        // Loop principal do jogo  
+        function gameLoop() {  
+            if (!gameRunning) return;  
+  
+            updateKittyPosition();  
+            updateMovingPlatforms();  
+            checkCollisions();  
+            checkGameStatus();  
+  
+            gameLoopId = requestAnimationFrame(gameLoop);  
+        }  
+  
+        // Atualizar a posição da Hello Kitty  
+        function updateKittyPosition() {  
+            // Aplicar gravidade  
+            kittyVelocityY += gravity;  
+            let newTop = parseInt(helloKitty.style.top) + kittyVelocityY;  
+  
+            // Verificar colisão com plataformas  
+            let onPlatform = false;  
+            for (let platform of platforms) {  
+                if (isOnPlatform(helloKitty, platform)) {  
+                    onPlatform = true;  
+                    newTop = parseInt(platform.style.top) - 70;  
+                    kittyVelocityY = 0;  
+                    isJumping = false;  
+                    break;  
+                }  
+            }  
+  
+            // Verificar colisão com plataformas móveis  
+            for (let platform of movingPlatforms) {  
+                if (isOnPlatform(helloKitty, platform.element)) {  
+                    onPlatform = true;  
+                    newTop = parseInt(platform.element.style.top) - 70;  
+                    kittyVelocityY = 0;  
+                    isJumping = false;  
+  
+                    // Movimentar a Hello Kitty junto com a plataforma  
+                    if (platform.direction === 'horizontal') {  
+                        helloKitty.style.left = (parseInt(helloKitty.style.left) + platform.speed) + 'px';  
+                    }  
+                    break;  
+                }  
+            }  
+  
+            // Limitar movimento vertical  
+            if (newTop > 430) {  
+                newTop = 430;  
+                kittyVelocityY = 0;  
+                isJumping = false;  
+            }  
+  
+            // Atualizar posição vertical  
+            helloKitty.style.top = newTop + 'px';  
+  
+            // Atualizar posição horizontal  
+            let newLeft = parseInt(helloKitty.style.left) + kittyVelocityX;  
+  
+            // Limitar movimento horizontal  
+            if (newLeft < 0) newLeft = 0;  
+            if (newLeft > 750) newLeft = 750;  
+  
+            helloKitty.style.left = newLeft + 'px';  
+  
+            // Reduzir velocidade horizontal (atrito)  
+            kittyVelocityX *= 0.9;  
+        }  
+  
+        // Atualizar plataformas móveis  
+        function updateMovingPlatforms() {  
+            for (let platform of movingPlatforms) {  
+                let currentPos = parseInt(platform.element.style[platform.direction === 'horizontal' ? 'left' : 'top']);  
+  
+                // Verificar se precisa inverter a direção  
+                if (currentPos <= platform.min) {  
+                    platform.speed = Math.abs(platform.speed);  
+                } else if (currentPos >= platform.max) {  
+                    platform.speed = -Math.abs(platform.speed);  
+                }  
+  
+                // Atualizar posição  
+                platform.element.style[platform.direction === 'horizontal' ? 'left' : 'top'] = (currentPos + platform.speed) + 'px';  
+            }  
+        }  
+  
+        // Verificar se está em uma plataforma  
+        function isOnPlatform(kitty, platform) {  
+            let kittyBottom = parseInt(kitty.style.top) + 70;  
+            let kittyLeft = parseInt(kitty.style.left);  
+            let kittyRight = kittyLeft + 50;  
+  
+            let platformTop = parseInt(platform.style.top);  
+            let platformLeft = parseInt(platform.style.left);  
+            let platformRight = platformLeft + parseInt(platform.style.width);  
+  
+            return (  
+                kittyBottom >= platformTop &&  
+                kittyBottom <= platformTop + 10 &&  
+                kittyRight > platformLeft &&  
+                kittyLeft < platformRight &&  
+                kittyVelocityY > 0  
+            );  
+        }  
+  
+        // Verificar colisões com moedas  
+        function checkCollisions() {  
+            for (let i = coins.length - 1; i >= 0; i--) {  
+                let coin = coins[i];  
+  
+                if (isColliding(helloKitty, coin)) {  
+                    coin.remove();  
+                    coins.splice(i, 1);  
+                    score += 10;  
+                    scoreDisplay.textContent = score;  
+  
+                    // Efeito visual ao coletar moeda  
+                    helloKitty.style.transform = 'scale(1.2)';  
+                    setTimeout(() => {  
+                        helloKitty.style.transform = 'scale(1)';  
+                    }, 200);  
+                }  
+            }  
+        }  
+  
+        // Verificar colisão entre dois elementos  
+        function isColliding(el1, el2) {  
+            let rect1 = el1.getBoundingClientRect();  
+            let rect2 = el2.getBoundingClientRect();  
+  
+            return (  
+                rect1.left < rect2.right &&  
+                rect1.right > rect2.left &&  
+                rect1.top < rect2.bottom &&  
+                rect1.bottom > rect2.top  
+            );  
+        }  
+  
+        // Verificar status do jogo  
+        function checkGameStatus() {  
+            // Verificar se a Hello Kitty caiu (atingiu o "chão" do jogo)  
+            if (parseInt(helloKitty.style.top) > gameContainer.clientHeight) { //gameover  
+                // Aplicar efeito visual de queda  
+                helloKitty.classList.add('falling');  
+  
+                // Finalizar o jogo após breve delay para a animação  
+                setTimeout(() => {  
+                    endGame();  
+                }, 500);  
+            }  
+        }  
+  
+        // Finalizar o jogo  
+        function endGame() {  
+            gameRunning = false;  
+            finalScoreDisplay.textContent = score;  
+            gameOverScreen.style.display = 'flex';  
+            cancelAnimationFrame(gameLoopId);  
+  
+            // Limpar o intervalo de perda de pontos  
+            clearInterval(scoreLossInterval);  
+        }  
+  
+        // Reiniciar o jogo  
+        function restartGame() {  
+            startGame();  
+        }  
+  
+        // Criar plataforma  
+        function createPlatform(x, y, width, height) {  
+           let platform = document.createElement('div');  
+            platform.className = 'platform';  
+            platform.style.left = x + 'px';  
+            platform.style.top = y + 'px';  
+            platform.style.width = width + 'px';  
+            platform.style.height = height + 'px';  
+  
+            // Eventos de mouse para interatividade  
+            platform.addEventListener('mouseover', () => {  
+                platform.style.backgroundColor = '#6cc768'; // Cor mais escura  
+            });  
+  
+            platform.addEventListener('mouseout', () => {  
+                platform.style.backgroundColor = '#8aed86'; // Cor original  
+            });  
+  
+            platform.addEventListener('mousedown', () => {  
+                platform.style.backgroundColor = '#4caf50'; // Cor mais escura ainda ao clicar  
+            });  
+  
+            platform.addEventListener('mouseup', () => {  
+                platform.style.backgroundColor = '#6cc768'; // Volta para a cor de hover ao soltar  
+            });  
+  
+  
+            gameContainer.appendChild(platform);  
+            platforms.push(platform);  
+        }  
+  
+        // Criar plataforma móvel  
+        function createMovingPlatform(x, y, width, height, min, max, speed, direction = 'horizontal') {  
+            let platform = document.createElement('div');  
+            platform.className = 'moving-platform';  
+            platform.style.left = x + 'px';  
+            platform.style.top = y + 'px';  
+            platform.style.width = width + 'px';  
+            platform.style.height = height + 'px';  
+            gameContainer.appendChild(platform);  
+  
+            movingPlatforms.push({  
+                element: platform,  
+                min: min,  
+                max: max,  
+                speed: speed,  
+                direction: direction  
+            });  
+        }  
+  
+        // Criar moeda  
+        function createCoin(x, y) {  
+            let coin = document.createElement('div');  
+            coin.className = 'coin';  
+            coin.style.left = x + 'px';  
+            coin.style.top = y + 'px';  
+            gameContainer.appendChild(coin);  
+            coins.push(coin);  
+        }  
+  
+        // Criar nuvem  
+        function createCloud(x, y, size) {  
+            let cloud = document.createElement('div');  
+            cloud.className = 'cloud';  
+            cloud.style.left = x + 'px';  
+            cloud.style.top = y + 'px';  
+            cloud.style.width = size + 'px';  
+            cloud.style.height = size/2 + 'px';  
+            gameContainer.appendChild(cloud);  
+        }  
+  
+        // Movimentação  
+        function moveLeft() {  
+            if (!gameRunning) return;  
+            kittyVelocityX = -5;  
+        }  
+  
+        function moveRight() {  
+            if (!gameRunning) return;  
+            kittyVelocityX = 5;  
+        }  
+  
+        function jump() {  
+            if (!gameRunning) return;  
+            if (!isJumping) {  
+                kittyVelocityY = -12;  
+                isJumping = true;  
+            }  
+        }  
+  
+        // Controles de teclado  
+        document.addEventListener('keydown', (e) => {  
+            if (!gameRunning) return;  
+  
+            if (e.key === 'ArrowLeft') moveLeft();  
+            if (e.key === 'ArrowRight') moveRight();  
+            if (e.key === ' ' || e.key === 'ArrowUp') jump();  
+        });  
+  
+        // Inicializar o jogo  
+        window.onload = function() {  
+            // Posicionar Hello Kitty  
+            helloKitty.style.top = '300px';  
+            helloKitty.style.left = '100px';  
+        };  
+    </script>  
+</body>  
+</html>  
