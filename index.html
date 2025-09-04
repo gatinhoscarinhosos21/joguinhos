@@ -1,132 +1,178 @@
  <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" >
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Jogo Hello Kitty - Plataforma Rosa</title>
-<style>
-  /* Reset */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hello Kitty Rosa Kawaii Game</title>
+  <style>
+    /* Reset */
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+    body, html {
+      height: 100%;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ffc0cb, #ffb6c1, #ff69b4);
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      user-select: none;
+    }
 
-  body {
-    background: #ffe4f0; /* rosa claro */
-    font-family: 'Comic Sans MS', cursive, sans-serif;
-    overflow: hidden;
-  }
+    /* Glitter animado no fundo */
+    #glitter {
+      pointer-events: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 2px),
+        radial-gradient(circle, rgba(255,192,203,0.8) 1px, transparent 2px);
+      background-size: 20px 20px, 40px 40px;
+      animation: glitterMove 15s linear infinite;
+      z-index: 0;
+    }
 
-  #gameContainer {
-    position: relative;
-    width: 400px;
-    height: 600px;
-    margin: 40px auto;
-    background: #ffb6d9; /* rosa médio */
-    border: 5px solid #ff69b4; /* rosa forte */
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 0 15px #ff69b4;
-  }
+    @keyframes glitterMove {
+      0% { background-position: 0 0, 0 0; }
+      100% { background-position: 100px 100px, 200px 200px; }
+    }
 
-  #helloKitty {
-    position: absolute;
-    width: 50px;
-    height: 70px;
-    background: url('https://i.imgur.com/Mk8cV8z.png') no-repeat center/contain;
-    top: 500px;
-    left: 175px;
-    transition: top 0.1s ease;
-  }
+    #gameContainer {
+      position: relative;
+      width: 420px;
+      height: 600px;
+      margin: 50px auto;
+      background: #fff0f6;
+      border: 6px solid #ff69b4;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 0 20px #ff66bbcc;
+      z-index: 10;
+    }
 
-  /* Laço rosa */
-  #helloKitty::before {
-    content: '';
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    width: 20px;
-    height: 20px;
-    background: #ff69b4;
-    border-radius: 50% 50% 0 0;
-    box-shadow: 15px 0 0 #ff69b4;
-  }
+    /* Hello Kitty com laço animado */
+    #helloKitty {
+      position: absolute;
+      width: 70px;
+      height: 100px;
+      top: 500px;
+      left: 175px;
+      background: url('https://i.imgur.com/Mk8cV8z.png') no-repeat center/contain;
+      transition: left 0.1s ease;
+      z-index: 20;
+    }
+    #helloKitty::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      width: 25px;
+      height: 25px;
+      background: #ff1493;
+      border-radius: 50% 50% 0 0;
+      box-shadow: 25px 0 0 #ff1493;
+      animation: bowMove 1.5s ease-in-out infinite;
+      z-index: 25;
+    }
+    @keyframes bowMove {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(15deg); }
+    }
 
-  .platform {
-    position: absolute;
-    width: 100px;
-    height: 20px;
-    background: linear-gradient(135deg, #ff99cc, #ff66b2);
-    border-radius: 10px;
-    box-shadow: 0 3px 6px #ff4d94;
-  }
+    /* Plataforma rosa pulsante */
+    .platform {
+      position: absolute;
+      width: 110px;
+      height: 22px;
+      background: linear-gradient(45deg, #ff8ac9, #ff5ca8);
+      border-radius: 15px;
+      box-shadow: 0 3px 8px #ff2e88;
+      animation: pulse 3s ease-in-out infinite;
+      z-index: 15;
+    }
+    .platform::before {
+      content: '🎀';
+      position: absolute;
+      top: -20px;
+      right: 10px;
+      font-size: 22px;
+      animation: pulse 3s ease-in-out infinite;
+      z-index: 16;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
 
-  /* Plataforma com laço */
-  .platform::before {
-    content: '🎀';
-    position: absolute;
-    top: -15px;
-    right: 10px;
-    font-size: 20px;
-  }
+    /* Score */
+    #score {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      color: #d6006c;
+      font-weight: 900;
+      font-size: 28px;
+      text-shadow: 1px 1px 3px #ffa3d7;
+      z-index: 30;
+    }
 
-  #score {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    color: #fff;
-    font-weight: bold;
-    font-size: 20px;
-    text-shadow: 0 0 3px #ff69b4;
-  }
+    /* Tela Game Over personalizada */
+    #gameOverScreen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 20, 147, 0.85);
+      color: #fff;
+      font-size: 40px;
+      font-weight: 900;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-radius: 20px;
+      box-shadow: 0 0 40px #ff1493;
+      z-index: 50;
+      display: none;
+      animation: confettiDrop 1.5s ease forwards;
+    }
+    @keyframes confettiDrop {
+      0% {opacity: 0; transform: translateY(-100px);}
+      100% {opacity: 1; transform: translateY(0);}
+    }
 
-  #gameOverScreen {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 105, 180, 0.9);
-    color: white;
-    font-size: 36px;
-    font-weight: bold;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border-radius: 15px;
-    display: none;
-  }
+    #gameOverScreen button {
+      margin-top: 30px;
+      padding: 15px 40px;
+      font-size: 24px;
+      background: #ff1493;
+      border: none;
+      border-radius: 18px;
+      color: white;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: 0 5px 15px #ff4da6;
+      transition: background-color 0.3s ease;
+    }
+    #gameOverScreen button:hover {
+      background: #d6006c;
+    }
 
-  #gameOverScreen button {
-    margin-top: 20px;
-    padding: 10px 30px;
-    font-size: 20px;
-    background: #ff4d94;
-    border: none;
-    border-radius: 12px;
-    color: white;
-    cursor: pointer;
-    box-shadow: 0 4px 8px #ff4d94;
-  }
-
-  #gameOverScreen button:hover {
-    background: #ff1a75;
-  }
-</style>
+  </style>
 </head>
 <body>
 
-<div id="gameContainer">
-  <div id="helloKitty"></div>
-  <div id="score">Pontos: 0</div>
-  <div id="gameOverScreen">
-    <div>Game Over!</div>
-    <div id="finalScore"></div>
-    <button id="restartBtn">Jogar de novo</button>
+  <div id="glitter"></div>
+  <div id="gameContainer">
+    <div id="helloKitty"></div>
+    <div id="score">Pontos: 0</div>
+    <div id="gameOverScreen">
+      <div>Game Over! 💖</div>
+      <div id="finalScore"></div>
+      <button id="restartBtn">Jogar de novo</button>
+    </div>
   </div>
-</div>
 
 <script>
+  // Setup variáveis básicas
   const gameContainer = document.getElementById('gameContainer');
   const helloKitty = document.getElementById('helloKitty');
   const scoreDisplay = document.getElementById('score');
@@ -137,71 +183,67 @@
   const containerWidth = gameContainer.clientWidth;
   const containerHeight = gameContainer.clientHeight;
 
+  // Kitty props
   let kitty = {
     x: 175,
     y: 500,
-    width: 50,
-    height: 70,
+    width: 70,
+    height: 100,
     velocityY: 0,
-    gravity: 0.6,
-    jumpStrength: -12,
+    gravity: 0.65,
+    jumpStrength: -15,
     onPlatform: false,
   };
 
   let platforms = [];
-  let platformSpeed = 1.5;
-  let platformSpawnTimer = 0;
-  let platformSpawnInterval = 90;
-
+  let platformSpeed = 2;
   let score = 0;
   let gameRunning = true;
 
-  // Controle de teclado
-  let keys = {
-    left: false,
-    right: false,
-    up: false,
-  };
+  // Controle teclado
+  let keys = { left: false, right: false };
 
-  // Cria plataformas iniciais
+  // Criar plataforma
   function createPlatform(x, y) {
     return {
-      x: x,
-      y: y,
-      width: 100,
-      height: 20,
+      x,
+      y,
+      width: 110,
+      height: 22,
       movingRight: Math.random() < 0.5,
-      speed: 1 + Math.random() * 1.5,
+      speed: 1 + Math.random(),
       element: null,
     };
   }
 
+  // Inicializa o jogo
   function setup() {
-    // Apaga plataformas antigas se existirem
+    // Remove plataformas antigas do DOM
     platforms.forEach(p => p.element && gameContainer.removeChild(p.element));
     platforms = [];
 
-    // Plataforma inicial (para Kitty ficar em pé)
+    // Plataforma base para Kitty começar
     let basePlatform = createPlatform(150, 570);
     platforms.push(basePlatform);
 
-    // Criar algumas plataformas aleatórias
-    for (let i = 0; i < 5; i++) {
-      let px = Math.random() * (containerWidth - 100);
-      let py = 400 - i * 100;
+    // Criar plataformas aleatórias
+    for(let i = 0; i < 6; i++) {
+      let px = Math.random() * (containerWidth - 110);
+      let py = 400 - i * 90;
       platforms.push(createPlatform(px, py));
     }
 
-    // Criar elementos no DOM para as plataformas
+    // Cria elementos das plataformas no DOM
     platforms.forEach(p => {
-      let platDiv = document.createElement('div');
-      platDiv.classList.add('platform');
-      platDiv.style.left = p.x + 'px';
-      platDiv.style.top = p.y + 'px';
-      gameContainer.appendChild(platDiv);
-      p.element = platDiv;
+      let div = document.createElement('div');
+      div.classList.add('platform');
+      div.style.left = p.x + 'px';
+      div.style.top = p.y + 'px';
+      gameContainer.appendChild(div);
+      p.element = div;
     });
 
+    // Reset Kitty
     kitty.x = 175;
     kitty.y = 500;
     kitty.velocityY = 0;
@@ -210,53 +252,52 @@
     score = 0;
     gameRunning = true;
     gameOverScreen.style.display = 'none';
+    scoreDisplay.textContent = `Pontos: 0`;
 
     updateKittyPosition();
-    updateScore();
   }
 
+  // Atualiza posição da Kitty e plataforma
   function updateKittyPosition() {
-    // Aplica gravidade
     kitty.velocityY += kitty.gravity;
     kitty.y += kitty.velocityY;
 
-    // Movimenta para os lados se teclas pressionadas
-    if (keys.left) kitty.x -= 4;
-    if (keys.right) kitty.x += 4;
+    // Movimento horizontal suave
+    if (keys.left) kitty.x -= 5;
+    if (keys.right) kitty.x += 5;
 
-    // Limita movimento horizontal dentro do container
+    // Limites horizontais
     if (kitty.x < 0) kitty.x = 0;
     if (kitty.x > containerWidth - kitty.width) kitty.x = containerWidth - kitty.width;
 
-    // Colisão com plataformas
+    // Atualiza plataformas (movimento horizontal)
     kitty.onPlatform = false;
-    for (let p of platforms) {
-      // Plataforma se move horizontalmente
-      if (p.movingRight) {
+    platforms.forEach(p => {
+      if(p.movingRight){
         p.x += p.speed;
-        if (p.x + p.width > containerWidth) p.movingRight = false;
+        if(p.x + p.width > containerWidth) p.movingRight = false;
       } else {
         p.x -= p.speed;
-        if (p.x < 0) p.movingRight = true;
+        if(p.x < 0) p.movingRight = true;
       }
       p.element.style.left = p.x + 'px';
 
-      // Checa colisão Kitty com plataforma
-      if (
+      // Colisão plataforma Kitty
+      if(
         kitty.x + kitty.width > p.x &&
         kitty.x < p.x + p.width &&
         kitty.y + kitty.height >= p.y &&
         kitty.y + kitty.height <= p.y + p.height &&
         kitty.velocityY >= 0
-      ) {
+      ){
         kitty.y = p.y - kitty.height;
         kitty.velocityY = 0;
         kitty.onPlatform = true;
       }
-    }
+    });
 
-    // Limita Kitty para não sair do topo
-    if (kitty.y < 0) {
+    // Limita Kitty no topo
+    if(kitty.y < 0){
       kitty.y = 0;
       kitty.velocityY = 0;
     }
@@ -265,52 +306,57 @@
     helloKitty.style.left = kitty.x + 'px';
     helloKitty.style.top = kitty.y + 'px';
 
-    // Checa se caiu fora da tela - game over
-    if (kitty.y > containerHeight) {
+    // Verifica game over
+    if(kitty.y > containerHeight){
       endGame();
     }
   }
 
-  function updateScore() {
-    score++;
-    scoreDisplay.textContent = 'Pontos: ' + score;
+  // Pulo com som
+  function jump() {
+    if(kitty.onPlatform){
+      kitty.velocityY = kitty.jumpStrength;
+      kitty.onPlatform = false;
+      playJumpSound();
+    }
   }
 
-  function gameLoop() {
-    if (!gameRunning) return;
+  // Sons
+  const jumpSound = new Audio('https://freesound.org/data/previews/331/331912_3248244-lq.mp3'); // som jump fofo
+  jumpSound.volume = 0.15;
+  function playJumpSound(){
+    jumpSound.currentTime = 0;
+    jumpSound.play();
+  }
+
+  // Controle teclado
+  window.addEventListener('keydown', e => {
+    if(e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
+    if(e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
+    if(e.key === 'ArrowUp' || e.key === 'w' || e.key === ' ') jump();
+  });
+  window.addEventListener('keyup', e => {
+    if(e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
+    if(e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+  });
+
+  // Game loop principal
+  function gameLoop(){
+    if(!gameRunning) return;
 
     updateKittyPosition();
 
-    // Incrementa score a cada frame (ajusta se quiser mais lento)
-    if (score % 5 === 0) updateScore();
+    // Pontuação aumenta conforme o tempo
+    score++;
+    scoreDisplay.textContent = `Pontos: ${score}`;
 
     requestAnimationFrame(gameLoop);
   }
 
-  // Pulo
-  function jump() {
-    if (kitty.onPlatform) {
-      kitty.velocityY = kitty.jumpStrength;
-      kitty.onPlatform = false;
-    }
-  }
-
-  // Eventos teclado
-  window.addEventListener('keydown', e => {
-    if (e.key === 'ArrowLeft') keys.left = true;
-    if (e.key === 'ArrowRight') keys.right = true;
-    if (e.key === 'ArrowUp') jump();
-  });
-
-  window.addEventListener('keyup', e => {
-    if (e.key === 'ArrowLeft') keys.left = false;
-    if (e.key === 'ArrowRight') keys.right = false;
-  });
-
-  // Game Over
-  function endGame() {
+  // Tela game over
+  function endGame(){
     gameRunning = false;
-    finalScoreDisplay.textContent = `Você fez ${score} pontos!`;
+    finalScoreDisplay.textContent = `Você fez ${score} pontos! 💕`;
     gameOverScreen.style.display = 'flex';
   }
 
@@ -326,3 +372,4 @@
 
 </body>
 </html>
+
