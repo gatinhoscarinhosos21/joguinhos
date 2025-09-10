@@ -1,213 +1,135 @@
  <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gatinho Rosa - Jogo de Plataforma</title>
+  <meta charset="UTF-8">
+  <title>Jogo de Plataforma</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      background: linear-gradient(to bottom, #ffe6f0, #ffccdd);
-      font-family: 'Comic Sans MS', cursive;
+      background: #222;
       overflow: hidden;
     }
 
     canvas {
       display: block;
       margin: 0 auto;
-      background: #fff0f5;
-      border: 5px solid #ff99cc;
-      border-radius: 15px;
-      box-shadow: 0 0 20px #ff99cc;
-    }
-
-    #score {
-      position: absolute;
-      top: 10px;
-      left: 20px;
-      font-size: 24px;
-      color: #ff3399;
-      font-weight: bold;
-      text-shadow: 1px 1px #fff;
+      background: #87ceeb;
+      border: 4px solid #000;
     }
   </style>
 </head>
 <body>
-  <div id="score">Pontuação: 0</div>
-  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <canvas id="gameCanvas" width="800" height="400"></canvas>
 
   <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const scoreDisplay = document.getElementById('score');
-
-    const imgCat = new Image();
-    imgCat.src = 'https://i.imgur.com/QblI2dT.png';
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
 
     const player = {
-      x: 180,
-      y: 500,
-      width: 40,
-      height: 40,
-      dy: 0,
-      gravity: 0.3,
-      jumpForce: -8,
-      speed: 4
+      x: 50,
+      y: 300,
+      width: 30,
+      height: 30,
+      color: "#ff0000",
+      velocityX: 0,
+      velocityY: 0,
+      speed: 4,
+      jumping: false
     };
 
-    const platforms = [];
-    const platformCount = 6;
-    const platformWidth = 80;
-    const platformHeight = 10;
+    const gravity = 0.6;
+    const friction = 0.8;
+    const groundLevel = 370;
 
-    let score = 0;
-    let maxHeight = player.y;
+    const keys = {};
 
-    const keys = {
-      ArrowLeft: false,
-      ArrowRight: false
-    };
-
-    function getRandomPlatformType() {
-      const rand = Math.random();
-      if (rand < 0.6) return "normal";     // 60%
-      if (rand < 0.85) return "movable";   // 25%
-      return "breakable";                  // 15%
-    }
-
-    function createPlatform(y) {
-      const type = getRandomPlatformType();
-      return {
-        x: Math.random() * (canvas.width - platformWidth),
-        y: y,
-        width: platformWidth,
-        height: platformHeight,
-        type: type,
-        dx: type === "movable" ? (Math.random() > 0.5 ? 1 : -1) : 0,
-        broken: false
-      };
-    }
-
-    // Criar plataformas iniciais
-    for (let i = 0; i < platformCount; i++) {
-      platforms.push(createPlatform(i * 100));
-    }
-
-    function drawPlatform(p) {
-      if (p.broken) return;
-
-      if (p.type === "normal") {
-        ctx.fillStyle = "#ff99cc";
-      } else if (p.type === "movable") {
-        ctx.fillStyle = "#ff66aa";
-      } else if (p.type === "breakable") {
-        ctx.fillStyle = "#ffcccc";
-      }
-
-      ctx.fillRect(p.x, p.y, p.width, p.height);
-      ctx.fillStyle = "#ffaad0";
-      ctx.fillRect(p.x + 10, p.y + 2, p.width - 20, 2);
-    }
-
-    function drawPlayer() {
-      ctx.drawImage(imgCat, player.x, player.y, player.width, player.height);
-    }
-
-    function updateScore() {
-      if (player.y < maxHeight) {
-        score += Math.floor((maxHeight - player.y));
-        maxHeight = player.y;
-        scoreDisplay.textContent = `Pontuação: ${score}`;
-      }
-    }
-
-    function update() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Movimento do jogador
-      if (keys.ArrowLeft) player.x -= player.speed;
-      if (keys.ArrowRight) player.x += player.speed;
-
-      player.dy += player.gravity;
-      player.y += player.dy;
-
-      // Plataformas
-      for (let p of platforms) {
-        // Mover plataformas móveis
-        if (p.type === "movable") {
-          p.x += p.dx;
-          if (p.x <= 0 || p.x + p.width >= canvas.width) {
-            p.dx *= -1;
-          }
-        }
-
-        drawPlatform(p);
-
-        // Colisão
-        if (
-          !p.broken &&
-          player.dy >= 0 &&
-          player.x + player.width > p.x &&
-          player.x < p.x + p.width &&
-          player.y + player.height >= p.y &&
-          player.y + player.height <= p.y + 10
-        ) {
-          if (p.type === "breakable") {
-            p.broken = true; // Desaparece
-          } else {
-            player.y = p.y - player.height;
-            player.dy = player.jumpForce;
-          }
-        }
-      }
-
-      // Scroll da tela
-      if (player.y < canvas.height / 2) {
-        const delta = canvas.height / 2 - player.y;
-        player.y = canvas.height / 2;
-
-        for (let p of platforms) {
-          p.y += delta;
-        }
-
-        updateScore();
-      }
-
-      // Reposição de plataformas
-      if (platforms[0].y > canvas.height) {
-        platforms.shift();
-        platforms.push(createPlatform(platforms[platforms.length - 1].y - 100));
-      }
-
-      drawPlayer();
-
-      // Game Over
-      if (player.y > canvas.height) {
-        alert(`Oh não! O gatinho caiu 😿\nSua pontuação: ${score}`);
-        document.location.reload();
-      }
-
-      requestAnimationFrame(update);
-    }
+    const platforms = [
+      { x: 0, y: 370, width: 800, height: 30, color: "#654321" },
+      { x: 150, y: 300, width: 100, height: 10, color: "#444" },
+      { x: 300, y: 250, width: 100, height: 10, color: "#444" },
+      { x: 450, y: 200, width: 100, height: 10, color: "#444" }
+    ];
 
     document.addEventListener("keydown", (e) => {
-      if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
+      keys[e.code] = true;
     });
 
     document.addEventListener("keyup", (e) => {
-      if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
+      keys[e.code] = false;
     });
 
-    imgCat.onload = () => {
+    function update() {
+      // Movimento horizontal
+      if (keys["ArrowRight"] || keys["KeyD"]) {
+        player.velocityX = player.speed;
+      } else if (keys["ArrowLeft"] || keys["KeyA"]) {
+        player.velocityX = -player.speed;
+      } else {
+        player.velocityX *= friction;
+      }
+
+      // Pulo
+      if ((keys["ArrowUp"] || keys["Space"] || keys["KeyW"]) && !player.jumping) {
+        player.velocityY = -12;
+        player.jumping = true;
+      }
+
+      // Aplicar gravidade
+      player.velocityY += gravity;
+      player.x += player.velocityX;
+      player.y += player.velocityY;
+
+      // Colisão com plataformas
+      platforms.forEach((plat) => {
+        if (
+          player.x < plat.x + plat.width &&
+          player.x + player.width > plat.x &&
+          player.y < plat.y + plat.height &&
+          player.y + player.height > plat.y
+        ) {
+          // Colisão por cima
+          if (player.velocityY >= 0) {
+            player.y = plat.y - player.height;
+            player.velocityY = 0;
+            player.jumping = false;
+          }
+        }
+      });
+
+      // Limites do chão
+      if (player.y + player.height > canvas.height) {
+        player.y = canvas.height - player.height;
+        player.velocityY = 0;
+        player.jumping = false;
+      }
+
+      // Limites da tela
+      if (player.x < 0) player.x = 0;
+      if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Desenhar jogador
+      ctx.fillStyle = player.color;
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+
+      // Desenhar plataformas
+      platforms.forEach((plat) => {
+        ctx.fillStyle = plat.color;
+        ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
+      });
+    }
+
+    function gameLoop() {
       update();
-    };
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
   </script>
 </body>
 </html>
-
-
