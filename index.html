@@ -1,162 +1,137 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gatinho Rosa - Jogo de Plataforma</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+<script>
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const scoreDisplay = document.getElementById('score');
+
+  const imgCat = new Image();
+  imgCat.src = 'https://i.imgur.com/QblI2dT.png';
+
+  const player = {
+    x: 180,
+    y: 500,
+    width: 40,
+    height: 40,
+    dy: 0,
+    gravity: 0.3,       // Gravidade mais suave
+    jumpForce: -8,      // Pulo um pouco mais leve
+    speed: 4,
+    isJumping: false
+  };
+
+  const platforms = [];
+  const platformCount = 6;
+  const platformWidth = 80;
+  const platformHeight = 10;
+
+  let score = 0;
+  let maxHeight = player.y;
+
+  const keys = {
+    ArrowLeft: false,
+    ArrowRight: false
+  };
+
+  // Criar plataformas iniciais
+  for (let i = 0; i < platformCount; i++) {
+    platforms.push({
+      x: Math.random() * (canvas.width - platformWidth),
+      y: i * 100,
+      width: platformWidth,
+      height: platformHeight
+    });
+  }
+
+  function drawPlatform(p) {
+    ctx.fillStyle = "#ff99cc";
+    ctx.fillRect(p.x, p.y, p.width, p.height);
+    ctx.fillStyle = "#ff66aa";
+    ctx.fillRect(p.x + 10, p.y + 2, p.width - 20, 2);
+  }
+
+  function drawPlayer() {
+    ctx.drawImage(imgCat, player.x, player.y, player.width, player.height);
+  }
+
+  function updateScore() {
+    if (player.y < maxHeight) {
+      score += Math.floor((maxHeight - player.y));
+      maxHeight = player.y;
+      scoreDisplay.textContent = `Pontuação: ${score}`;
+    }
+  }
+
+  function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Movimento horizontal
+    if (keys.ArrowLeft) player.x -= player.speed;
+    if (keys.ArrowRight) player.x += player.speed;
+
+    // Gravidade
+    player.dy += player.gravity;
+    player.y += player.dy;
+
+    // Colisão com plataformas
+    for (let p of platforms) {
+      drawPlatform(p);
+
+      if (
+        player.dy >= 0 && // só colide quando está caindo
+        player.x + player.width > p.x &&
+        player.x < p.x + p.width &&
+        player.y + player.height >= p.y &&
+        player.y + player.height <= p.y + 10
+      ) {
+        player.y = p.y - player.height;  // Posiciona em cima da plataforma
+        player.dy = player.jumpForce;    // Pula novamente
+        player.isJumping = false;
+      }
     }
 
-    body {
-      background: linear-gradient(to bottom, #ffe6f0, #ffccdd);
-      font-family: 'Comic Sans MS', cursive;
-      overflow: hidden;
+    // Scroll do cenário
+    if (player.y < canvas.height / 2) {
+      const delta = canvas.height / 2 - player.y;
+      player.y = canvas.height / 2;
+
+      for (let p of platforms) {
+        p.y += delta;
+      }
+
+      updateScore();
     }
 
-    canvas {
-      display: block;
-      margin: 0 auto;
-      background: #fff0f5;
-      border: 5px solid #ff99cc;
-      border-radius: 15px;
-      box-shadow: 0 0 20px #ff99cc;
-    }
-  </style>
-</head>
-<body>
-  <canvas id="gameCanvas" width="400" height="600"></canvas>
-
-  <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-
-    const imgCat = new Image();
-    imgCat.src = 'https://i.imgur.com/QblI2dT.png'; // Gatinho rosa fofo
-
-    // Player (gatinho)
-    const player = {
-      x: 180,
-      y: 500,
-      width: 40,
-      height: 40,
-      dy: 0,
-      gravity: 0.5,
-      jumpForce: -10,
-      onGround: false,
-      speed: 4
-    };
-
-    // Plataformas
-    const platforms = [];
-    const platformCount = 6;
-    const platformWidth = 80;
-    const platformHeight = 10;
-
-    // Controles
-    const keys = {
-      ArrowLeft: false,
-      ArrowRight: false
-    };
-
-    // Criar plataformas iniciais
-    for (let i = 0; i < platformCount; i++) {
+    // Reposição de plataformas
+    if (platforms[0].y > canvas.height) {
+      platforms.shift();
       platforms.push({
         x: Math.random() * (canvas.width - platformWidth),
-        y: i * 100,
+        y: platforms[platforms.length - 1].y - 100,
         width: platformWidth,
         height: platformHeight
       });
     }
 
-    function drawPlatform(p) {
-      ctx.fillStyle = "#ff99cc";
-      ctx.fillRect(p.x, p.y, p.width, p.height);
-      ctx.fillStyle = "#ff66aa";
-      ctx.fillRect(p.x + 10, p.y + 2, p.width - 20, 2);
+    drawPlayer();
+
+    // Game Over
+    if (player.y > canvas.height) {
+      alert(`Oh não! O gatinho caiu 😿\nSua pontuação: ${score}`);
+      document.location.reload();
     }
 
-    function drawPlayer() {
-      ctx.drawImage(imgCat, player.x, player.y, player.width, player.height);
-    }
+    requestAnimationFrame(update);
+  }
 
-    function update() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+  document.addEventListener("keydown", (e) => {
+    if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
+  });
 
-      // Movimento do jogador
-      if (keys.ArrowLeft) {
-        player.x -= player.speed;
-      }
-      if (keys.ArrowRight) {
-        player.x += player.speed;
-      }
+  document.addEventListener("keyup", (e) => {
+    if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
+  });
 
-      // Gravidade
-      player.dy += player.gravity;
-      player.y += player.dy;
+  imgCat.onload = () => {
+    update();
+  };
+</script>
 
-      // Plataformas
-      for (let p of platforms) {
-        drawPlatform(p);
-
-        // Verifica colisão com plataformas
-        if (
-          player.dy > 0 &&
-          player.x + player.width > p.x &&
-          player.x < p.x + p.width &&
-          player.y + player.height >= p.y &&
-          player.y + player.height <= p.y + p.height
-        ) {
-          player.dy = player.jumpForce;
-        }
-      }
-
-      // Scroll
-      if (player.y < canvas.height / 2) {
-        const delta = canvas.height / 2 - player.y;
-        player.y = canvas.height / 2;
-
-        for (let p of platforms) {
-          p.y += delta;
-        }
-      }
-
-      // Remover plataformas fora da tela e adicionar novas
-      if (platforms[0].y > canvas.height) {
-        platforms.shift();
-        platforms.push({
-          x: Math.random() * (canvas.width - platformWidth),
-          y: platforms[platforms.length - 1].y - 100,
-          width: platformWidth,
-          height: platformHeight
-        });
-      }
-
-      drawPlayer();
-
-      // Game Over
-      if (player.y > canvas.height) {
-        alert("Oh não! O gatinho caiu 😿");
-        document.location.reload();
-      }
-
-      requestAnimationFrame(update);
-    }
-
-    document.addEventListener("keydown", (e) => {
-      if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
-    });
-
-    document.addEventListener("keyup", (e) => {
-      if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
-    });
-
-    imgCat.onload = () => {
-      update();
-    };
-  </script>
-</body>
-</html>
