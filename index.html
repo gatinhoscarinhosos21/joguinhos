@@ -5,12 +5,10 @@
   <title>Jogo de Plataforma</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       background: #222;
       overflow: hidden;
     }
-
     canvas {
       display: block;
       margin: 0 auto;
@@ -20,11 +18,13 @@
   </style>
 </head>
 <body>
-   <canvas id="gameCanvas" width="1600" height="400"></canvas>
+  <canvas id="gameCanvas" width="1600" height="400"></canvas>
+
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
+    // Jogador
     const player = {
       x: 50,
       y: 300,
@@ -39,32 +39,29 @@
 
     const gravity = 0.6;
     const friction = 0.8;
-    const groundLevel = 370;
+    let gameOver = false;
 
     const keys = {};
 
+    // Plataformas
     const platforms = [
-       
-  // Chão principal
-  { x: 0, y: 370, width: 800, height: 30, color: "#654321" },
+      // Chão principal
+      { x: 0, y: 370, width: 1600, height: 30, color: "#654321" },
 
-  // Plataformas originais
-  { x: 150, y: 300, width: 100, height: 10, color: "#444" },
-  { x: 300, y: 250, width: 100, height: 10, color: "#444" },
-  { x: 450, y: 200, width: 100, height: 10, color: "#444" },
-
-  // Novas plataformas
-  { x: 600, y: 150, width: 100, height: 10, color: "#444" },
-  { x: 720, y: 200, width: 100, height: 10, color: "#555" },
-  { x: 850, y: 250, width: 100, height: 10, color: "#666" },
-  { x: 1000, y: 300, width: 100, height: 10, color: "#777" },
-  { x: 1150, y: 200, width: 100, height: 10, color: "#888" },
-  { x: 1300, y: 150, width: 100, height: 10, color: "#999" },
-  { x: 1450, y: 250, width: 100, height: 10, color: "#aaa" }
-
-
+      // Plataformas principais
+      { x: 150, y: 300, width: 100, height: 10, color: "#444" },
+      { x: 300, y: 250, width: 100, height: 10, color: "#444" },
+      { x: 450, y: 200, width: 100, height: 10, color: "#444" },
+      { x: 600, y: 150, width: 100, height: 10, color: "#444" },
+      { x: 720, y: 200, width: 100, height: 10, color: "#555" },
+      { x: 850, y: 250, width: 100, height: 10, color: "#666" },
+      { x: 1000, y: 300, width: 100, height: 10, color: "#777" },
+      { x: 1150, y: 200, width: 100, height: 10, color: "#888" },
+      { x: 1300, y: 150, width: 100, height: 10, color: "#999" },
+      { x: 1450, y: 250, width: 100, height: 10, color: "#aaa" }
     ];
 
+    // Controles
     document.addEventListener("keydown", (e) => {
       keys[e.code] = true;
     });
@@ -74,7 +71,7 @@
     });
 
     function update() {
-      // Movimento horizontal
+      // Movimento lateral
       if (keys["ArrowRight"] || keys["KeyD"]) {
         player.velocityX = player.speed;
       } else if (keys["ArrowLeft"] || keys["KeyA"]) {
@@ -89,8 +86,10 @@
         player.jumping = true;
       }
 
-      // Aplicar gravidade
+      // Gravidade
       player.velocityY += gravity;
+
+      // Atualiza posição
       player.x += player.velocityX;
       player.y += player.velocityY;
 
@@ -111,14 +110,14 @@
         }
       });
 
-      // Limites do chão
-      if (player.y + player.height > canvas.height) {
-        player.y = canvas.height - player.height;
-        player.velocityY = 0;
-        player.jumping = false;
+      // Verifica se caiu fora da tela
+      if (player.y > canvas.height) {
+        gameOver = true;
+        setTimeout(resetGame, 2000); // Reinicia após 2 segundos
+        return;
       }
 
-      // Limites da tela
+      // Limites horizontais
       if (player.x < 0) player.x = 0;
       if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
     }
@@ -126,19 +125,42 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Desenhar jogador
+      // Jogador
       ctx.fillStyle = player.color;
       ctx.fillRect(player.x, player.y, player.width, player.height);
 
-      // Desenhar plataformas
+      // Plataformas
       platforms.forEach((plat) => {
         ctx.fillStyle = plat.color;
         ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
       });
+
+      // Tela de GAME OVER
+      if (gameOver) {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "48px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
+      }
+    }
+
+    function resetGame() {
+      // Reseta o jogador
+      player.x = 50;
+      player.y = 300;
+      player.velocityX = 0;
+      player.velocityY = 0;
+      player.jumping = false;
+
+      // Estado
+      gameOver = false;
     }
 
     function gameLoop() {
-      update();
+      if (!gameOver) update();
       draw();
       requestAnimationFrame(gameLoop);
     }
