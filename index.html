@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo de Plataforma</title>
+    <title>Jogo de Plataforma com Game Over</title>
     <style>
         * {
             margin: 0;
@@ -31,7 +31,7 @@
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
         
-        #game-canvas {
+        canvas {
             background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
             width: 100%;
             height: 100%;
@@ -140,18 +140,15 @@
             background: linear-gradient(to bottom, #42A5F5, #1565C0);
         }
         
-        .platform {
+        .instructions {
             position: absolute;
-            background: linear-gradient(to bottom, #8BC34A, #689F38);
-            border: 2px solid #33691E;
-            border-radius: 10px;
-        }
-        
-        #player {
-            position: absolute;
-            background: linear-gradient(to bottom, #F44336, #B71C1C);
-            border-radius: 50%;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-size: 16px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
     </style>
 </head>
@@ -172,7 +169,8 @@
             <button id="restart-button">Jogar Novamente</button>
         </div>
         
-        <canvas id="game-canvas"></canvas>
+        <canvas id="game-canvas" width="800" height="500"></canvas>
+        <div class="instructions">Setas ← → para mover | Espaço para pular</div>
     </div>
 
     <script>
@@ -186,10 +184,6 @@
             const startScreen = document.getElementById('start-screen');
             const startButton = document.getElementById('start-button');
             
-            // Definir o tamanho do canvas
-            canvas.width = 800;
-            canvas.height = 500;
-            
             // Variáveis do jogo
             let score = 0;
             let gameRunning = false;
@@ -197,6 +191,7 @@
             let player;
             let gravity = 0.5;
             let keys = {};
+            let animationId;
             
             // Classes do jogo
             class Player {
@@ -240,7 +235,7 @@
                             this.x + this.width > platform.x && 
                             this.x < platform.x + platform.width &&
                             this.y + this.height > platform.y &&
-                            this.y + this.height < platform.y + platform.height) {
+                            this.y + this.height < platform.y + platform.height + 10) {
                             
                             this.y = platform.y - this.height;
                             this.velocityY = 0;
@@ -325,6 +320,9 @@
                 scoreElement.textContent = 'Pontuação: ' + score;
                 
                 // Iniciar o loop do jogo
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
                 gameLoop();
             }
             
@@ -367,7 +365,7 @@
                 scoreElement.textContent = 'Pontuação: ' + Math.floor(score);
                 
                 // Continuar o loop
-                requestAnimationFrame(gameLoop);
+                animationId = requestAnimationFrame(gameLoop);
             }
             
             // Game over
@@ -375,19 +373,25 @@
                 gameRunning = false;
                 finalScoreElement.textContent = Math.floor(score);
                 gameOverScreen.style.display = 'flex';
+                cancelAnimationFrame(animationId);
             }
             
             // Event listeners para teclado
             window.addEventListener('keydown', function(e) {
-                keys[e.key] = true;
+                if (['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                    keys[e.key] = true;
+                    e.preventDefault();
+                }
             });
             
             window.addEventListener('keyup', function(e) {
-                keys[e.key] = false;
-                
-                // Permitir pular novamente ao soltar a barra de espaço
-                if (e.key === ' ') {
-                    player.jumping = false;
+                if (['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                    keys[e.key] = false;
+                    
+                    // Permitir pular novamente ao soltar a barra de espaço
+                    if (e.key === ' ') {
+                        player.jumping = false;
+                    }
                 }
             });
             
