@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adivinhe o Número</title>
+    <style>
+        /* Estilos (CSS) */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        input[type="number"] {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 80%;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #resultado {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Adivinhe o Número!</h1>
+        <p>Estou pensando em um número entre 1 e 100.</p>
+        
+        <label for="palpite">Seu Palpite:</label>
+        <input type="number" id="palpite" min="1" max="100" required>
+        
+        <button onclick="verificarPalpite()">Tentar</button>
+        <button onclick="reiniciarJogo()">Novo Jogo</button>
+        
+        <p id="resultado"></p>
+        <p>Tentativas: <span id="tentativas">0</span></p>
+    </div>
+
+    <script>
+        // Lógica do Jogo (JavaScript)
+        let numeroSecreto;
+        let tentativas;
+
+        // Função que inicia o jogo
+        function iniciarJogo() {
+            // Gera um número inteiro aleatório entre 1 e 100
+            numeroSecreto = Math.floor(Math.random() * 100) + 1;
+            tentativas = 0;
+            document.getElementById('resultado').textContent = '';
+            document.getElementById('tentativas').textContent = tentativas;
+            document.getElementById('palpite').value = '';
+            console.log('Número Secreto (apenas para debug):', numeroSecreto);
+        }
+
+        // Função que verifica o palpite do usuário
+        function verificarPalpite() {
+            const palpiteUsuario = parseInt(document.getElementById('palpite').value);
+            const resultadoElemento = document.getElementById('resultado');
+
+            // Verifica se o palpite é válido
+            if (isNaN(palpiteUsuario) || palpiteUsuario < 1 || palpiteUsuario > 100) {
+                resultadoElemento.textContent = 'Por favor, insira um número válido entre 1 e 100.';
+                return;
+            }
+
+            tentativas++;
+            document.getElementById('tentativas').textContent = tentativas;
+
+            if (palpiteUsuario === numeroSecreto) {
+                resultadoElemento.textContent = `🎉 Parabéns! Você acertou o número ${numeroSecreto} em ${tentativas} tentativas!`;
+                // Desabilita o campo de palpite após o acerto
+                document.getElementById('palpite').disabled = true;
+            } else if (palpiteUsuario < numeroSecreto) {
+                resultadoElemento.textContent = 'Muito baixo! Tente um número maior.';
+            } else {
+                resultadoElemento.textContent = 'Muito alto! Tente um número menor.';
+            }
+        }
+
+        // Função que reinicia o jogo
+        function reiniciarJogo() {
+            iniciarJogo();
+            document.getElementById('palpite').disabled = false;
+        }
+
+        // Inicia o jogo quando a página carrega
+        window.onload = iniciarJogo;
+    </script>
+</body>
+</html>
