@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jogo Clique no Quadrado</title>
+  <title>Jogo Clique no Quadrado com Ranking</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -51,6 +51,22 @@
     button:hover {
       background-color: #0056b3;
     }
+    #ranking {
+      max-width: 400px;
+      margin: 20px auto;
+      background: white;
+      border: 2px solid #333;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: left;
+    }
+    #ranking h2 {
+      text-align: center;
+      margin-top: 0;
+    }
+    #ranking ol {
+      padding-left: 20px;
+    }
   </style>
 </head>
 <body>
@@ -63,12 +79,20 @@
   <div id="timer">Tempo: 30s</div>
   <button id="startBtn">Iniciar Jogo</button>
 
+  <div id="ranking">
+    <h2>Ranking Top 5</h2>
+    <ol id="rankingList">
+      <!-- Ranking vai aparecer aqui -->
+    </ol>
+  </div>
+
   <script>
     const square = document.getElementById('square');
     const gameArea = document.getElementById('gameArea');
     const scoreDisplay = document.getElementById('score');
     const timerDisplay = document.getElementById('timer');
     const startBtn = document.getElementById('startBtn');
+    const rankingList = document.getElementById('rankingList');
 
     let score = 0;
     let timeLeft = 30; // segundos
@@ -76,7 +100,6 @@
     let timerInterval;
 
     function moveSquare() {
-      // Calcula posição aleatória dentro da área de jogo
       const maxX = gameArea.clientWidth - square.clientWidth;
       const maxY = gameArea.clientHeight - square.clientHeight;
 
@@ -95,6 +118,8 @@
         alert('Tempo esgotado! Sua pontuação final é: ' + score);
         startBtn.disabled = false;
         timerDisplay.textContent = 'Tempo: 0s';
+        salvarRanking(score);
+        mostrarRanking();
         return;
       }
       timerDisplay.textContent = `Tempo: ${timeLeft}s`;
@@ -120,6 +145,41 @@
       timerInterval = setInterval(updateTimer, 1000);
       gameInterval = setInterval(moveSquare, 1000);
     });
+
+    // Funções do ranking
+
+    function salvarRanking(pontos) {
+      let ranking = JSON.parse(localStorage.getItem('rankingTop5')) || [];
+
+      // Insere a nova pontuação
+      ranking.push(pontos);
+      // Ordena decrescente
+      ranking.sort((a, b) => b - a);
+      // Mantém só top 5
+      ranking = ranking.slice(0, 5);
+
+      localStorage.setItem('rankingTop5', JSON.stringify(ranking));
+    }
+
+    function mostrarRanking() {
+      let ranking = JSON.parse(localStorage.getItem('rankingTop5')) || [];
+
+      rankingList.innerHTML = '';
+      if (ranking.length === 0) {
+        rankingList.innerHTML = '<li>Nenhuma pontuação registrada ainda.</li>';
+        return;
+      }
+
+      ranking.forEach((pontos, index) => {
+        const li = document.createElement('li');
+        li.textContent = `#${index + 1} - ${pontos} pontos`;
+        rankingList.appendChild(li);
+      });
+    }
+
+    // Mostrar ranking ao carregar a página
+    mostrarRanking();
   </script>
 </body>
 </html>
+
