@@ -1,118 +1,125 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adivinhe o Número</title>
-    <style>
-        /* Estilos (CSS) */
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f9;
-            padding: 20px;
-        }
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #333;
-        }
-        input[type="number"] {
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 80%;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #resultado {
-            margin-top: 20px;
-            font-size: 1.1em;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jogo Clique no Quadrado</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+    #gameArea {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      margin: 20px auto;
+      background-color: white;
+      border: 2px solid #333;
+      overflow: hidden;
+    }
+    #square {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background-color: red;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+    #score {
+      font-size: 24px;
+      margin-top: 10px;
+    }
+    #timer {
+      font-size: 20px;
+      margin-top: 5px;
+      color: #555;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      margin-top: 15px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Adivinhe o Número!</h1>
-        <p>Estou pensando em um número entre 1 e 100.</p>
-        
-        <label for="palpite">Seu Palpite:</label>
-        <input type="number" id="palpite" min="1" max="100" required>
-        
-        <button onclick="verificarPalpite()">Tentar</button>
-        <button onclick="reiniciarJogo()">Novo Jogo</button>
-        
-        <p id="resultado"></p>
-        <p>Tentativas: <span id="tentativas">0</span></p>
-    </div>
 
-    <script>
-        // Lógica do Jogo (JavaScript)
-        let numeroSecreto;
-        let tentativas;
+  <h1>Jogo: Clique no Quadrado!</h1>
+  <div id="gameArea">
+    <div id="square"></div>
+  </div>
+  <div id="score">Pontuação: 0</div>
+  <div id="timer">Tempo: 30s</div>
+  <button id="startBtn">Iniciar Jogo</button>
 
-        // Função que inicia o jogo
-        function iniciarJogo() {
-            // Gera um número inteiro aleatório entre 1 e 100
-            numeroSecreto = Math.floor(Math.random() * 100) + 1;
-            tentativas = 0;
-            document.getElementById('resultado').textContent = '';
-            document.getElementById('tentativas').textContent = tentativas;
-            document.getElementById('palpite').value = '';
-            console.log('Número Secreto (apenas para debug):', numeroSecreto);
-        }
+  <script>
+    const square = document.getElementById('square');
+    const gameArea = document.getElementById('gameArea');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    const startBtn = document.getElementById('startBtn');
 
-        // Função que verifica o palpite do usuário
-        function verificarPalpite() {
-            const palpiteUsuario = parseInt(document.getElementById('palpite').value);
-            const resultadoElemento = document.getElementById('resultado');
+    let score = 0;
+    let timeLeft = 30; // segundos
+    let gameInterval;
+    let timerInterval;
 
-            // Verifica se o palpite é válido
-            if (isNaN(palpiteUsuario) || palpiteUsuario < 1 || palpiteUsuario > 100) {
-                resultadoElemento.textContent = 'Por favor, insira um número válido entre 1 e 100.';
-                return;
-            }
+    function moveSquare() {
+      // Calcula posição aleatória dentro da área de jogo
+      const maxX = gameArea.clientWidth - square.clientWidth;
+      const maxY = gameArea.clientHeight - square.clientHeight;
 
-            tentativas++;
-            document.getElementById('tentativas').textContent = tentativas;
+      const randomX = Math.floor(Math.random() * maxX);
+      const randomY = Math.floor(Math.random() * maxY);
 
-            if (palpiteUsuario === numeroSecreto) {
-                resultadoElemento.textContent = `🎉 Parabéns! Você acertou o número ${numeroSecreto} em ${tentativas} tentativas!`;
-                // Desabilita o campo de palpite após o acerto
-                document.getElementById('palpite').disabled = true;
-            } else if (palpiteUsuario < numeroSecreto) {
-                resultadoElemento.textContent = 'Muito baixo! Tente um número maior.';
-            } else {
-                resultadoElemento.textContent = 'Muito alto! Tente um número menor.';
-            }
-        }
+      square.style.left = randomX + 'px';
+      square.style.top = randomY + 'px';
+    }
 
-        // Função que reinicia o jogo
-        function reiniciarJogo() {
-            iniciarJogo();
-            document.getElementById('palpite').disabled = false;
-        }
+    function updateTimer() {
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        clearInterval(gameInterval);
+        square.style.display = 'none';
+        alert('Tempo esgotado! Sua pontuação final é: ' + score);
+        startBtn.disabled = false;
+        timerDisplay.textContent = 'Tempo: 0s';
+        return;
+      }
+      timerDisplay.textContent = `Tempo: ${timeLeft}s`;
+      timeLeft--;
+    }
 
-        // Inicia o jogo quando a página carrega
-        window.onload = iniciarJogo;
-    </script>
+    square.addEventListener('click', () => {
+      score++;
+      scoreDisplay.textContent = `Pontuação: ${score}`;
+      moveSquare();
+    });
+
+    startBtn.addEventListener('click', () => {
+      score = 0;
+      timeLeft = 30;
+      scoreDisplay.textContent = `Pontuação: ${score}`;
+      timerDisplay.textContent = `Tempo: ${timeLeft}s`;
+      square.style.display = 'block';
+      moveSquare();
+
+      startBtn.disabled = true;
+
+      timerInterval = setInterval(updateTimer, 1000);
+      gameInterval = setInterval(moveSquare, 1000);
+    });
+  </script>
 </body>
 </html>
